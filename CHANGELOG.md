@@ -3,6 +3,10 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [3.8] — 2026-07-20 (versionCode 29)
+### Added
+- **File operations inside Android/data.** Copy, Move (paste), Delete, Rename and New folder now run through the elevated shell (Shizuku or root) whenever the source, destination, or folder is a restricted path — previously only browse/open worked there. `Elevated` gained `delete`/`rename`/`mkdir`/`copyInto`/`moveInto` and a `needed()` check; slow ops run off the UI thread. Deletes of restricted items are permanent (the app recycle bin can't reach `Android/data`).
+
 ## [3.7] — 2026-07-20 (versionCode 28)
 ### Fixed
 - **Android/data via Shizuku:** opening a file (e.g. a video) failed with "couldn't read file" and every entry showed **0 MB**. The elevated copy-out now targets a shell-writable, app-readable temp dir on shared storage (`/sdcard/FilesDevTmp`) instead of the app's private cache — the Shizuku shell uid (2000) can't write into `/data/data/<pkg>` (only root could). Sizes are now parsed from `ls -lA` (the app can't `stat` restricted entries, so `File.length()` returned 0).

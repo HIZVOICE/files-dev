@@ -45,9 +45,31 @@ object Elevated {
         val tmp = File(StorageUtil.primaryStorage(), "FilesDevTmp").apply { mkdirs() }
         val dest = File(tmp, source.name)
         try { if (dest.exists()) dest.delete() } catch (_: Exception) {}
-        val s = source.absolutePath.replace("'", "'\\''")
-        val d = dest.absolutePath.replace("'", "'\\''")
-        sh("cp -f '$s' '$d' && chmod 0666 '$d'")
+        sh("cp -f '${esc(source.absolutePath)}' '${esc(dest.absolutePath)}' && chmod 0666 '${esc(dest.absolutePath)}'")
         return if (dest.exists() && dest.length() > 0) dest else null
     }
+
+    // ---- Elevated file operations (for restricted paths like Android/data) ----
+
+    private fun esc(p: String) = p.replace("'", "'\\''")
+
+    /**
+     * True when [f] can't be touched with the File API but an elevated backend can —
+     * i.e. it's an Android/data|obb entry or otherwise not writable. Pass an existing
+     * file/dir (a non-existent path always reports not-writable).
+     */
+    fun needed(f: File): Boolean = available() && (SafHelper.isRestricted(f) || !f.canWrite())
+
+    fun delete(f: File): Boolean = sh("rm -rf '${esc(f.absolutePath)}'").ok
+
+    fun rename(src: File, dst: File): Boolean =
+        sh("mv -f '${esc(src.absolutePath)}' '${esc(dst.absolutePath)}'").ok
+
+    fun mkdir(dir: File): Boolean = sh("mkdir -p '${esc(dir.absolutePath)}'").ok
+
+    fun copyInto(src: File, destDir: File): Boolean =
+        sh("cp -rf '${esc(src.absolutePath)}' '${esc(destDir.absolutePath)}/'").ok
+
+    fun moveInto(src: File, destDir: File): Boolean =
+        sh("mv -f '${esc(src.absolutePath)}' '${esc(destDir.absolutePath)}/'").ok
 }

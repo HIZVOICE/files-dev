@@ -97,8 +97,13 @@ object FileOps {
                 val n = input.text.toString().trim()
                 if (n.isEmpty()) { toast(activity, "Name required"); return@setPositiveButton }
                 val target = File(dir, n)
+                val useElev = Elevated.available() && (SafHelper.isRestricted(dir) || !dir.canWrite())
                 when {
                     target.exists() -> toast(activity, "Already exists")
+                    useElev -> bg(activity, { Elevated.mkdir(target) }) { ok ->
+                        if (ok) { FileScanner.invalidate(); onChanged(); toast(activity, "Created $n") }
+                        else toast(activity, "Couldn't create folder")
+                    }
                     target.mkdirs() -> { FileScanner.invalidate(); onChanged(); toast(activity, "Created $n") }
                     else -> toast(activity, "Couldn't create folder")
                 }
@@ -119,7 +124,11 @@ object FileOps {
                 val newName = input.text.toString().trim()
                 if (newName.isNotEmpty()) {
                     val dest = File(file.parentFile, newName)
-                    if (file.renameTo(dest)) { FileScanner.invalidate(); onChanged() }
+                    if (Elevated.needed(file)) {
+                        bg(activity, { Elevated.rename(file, dest) }) { ok ->
+                            if (ok) { FileScanner.invalidate(); onChanged() } else toast(activity, "Rename failed")
+                        }
+                    } else if (file.renameTo(dest)) { FileScanner.invalidate(); onChanged() }
                     else toast(activity, "Rename failed")
                 }
             }
@@ -128,16 +137,25 @@ object FileOps {
     }
 
     private fun deleteDialog(activity: Activity, file: File, onChanged: () -> Unit) {
-        val bin = Prefs.useRecycleBin(activity)
+        // Restricted paths (Android/data) can't be moved to the app's recycle bin —
+        // delete them permanently via the elevated shell instead.
+        val elev = Elevated.needed(file)
+        val bin = Prefs.useRecycleBin(activity) && !elev
         AlertDialog.Builder(activity)
             .setTitle(if (bin) "Move to Recycle bin" else "Delete")
             .setMessage(if (bin) "Move \"${file.name}\" to the Recycle bin? You can restore it later."
             else "Permanently delete \"${file.name}\"? This cannot be undone.")
             .setPositiveButton(if (bin) "Move" else "Delete") { _, _ ->
-                val ok = if (bin) TrashBin.trash(activity, file)
-                else if (file.isDirectory) file.deleteRecursively() else file.delete()
-                if (ok) { FileScanner.invalidate(); onChanged() }
-                else toast(activity, if (bin) "Couldn't move to bin" else "Delete failed")
+                if (elev) {
+                    bg(activity, { Elevated.delete(file) }) { ok ->
+                        if (ok) { FileScanner.invalidate(); onChanged() } else toast(activity, "Delete failed")
+                    }
+                } else {
+                    val ok = if (bin) TrashBin.trash(activity, file)
+                    else if (file.isDirectory) file.deleteRecursively() else file.delete()
+                    if (ok) { FileScanner.invalidate(); onChanged() }
+                    else toast(activity, if (bin) "Couldn't move to bin" else "Delete failed")
+                }
             }
             .setNegativeButton("Cancel", null)
             .show()
@@ -174,7 +192,12 @@ object FileOps {
                     try {
                         val dest = File(targetDir, f.name)
                         if (dest.absolutePath != f.absolutePath) {
-                            if (!(moving && f.renameTo(dest))) {
+                            if (Elevated.needed(targetDir) || Elevated.needed(f)) {
+                                // One or both endpoints are restricted (Android/data) — use the shell.
+                                val ok = if (moving) Elevated.moveInto(f, targetDir)
+                                else Elevated.copyInto(f, targetDir)
+                                if (!ok) fails++
+                            } else if (!(moving && f.renameTo(dest))) {
                                 val copied = f.copyRecursively(dest, overwrite = false)
                                 if (copied && moving) f.deleteRecursively()
                                 if (!copied) fails++
@@ -201,8 +224,12 @@ object FileOps {
                 Thread {
                     var fails = 0
                     for (f in files) {
-                        val ok = if (bin) TrashBin.trash(activity, f)
-                        else if (f.isDirectory) f.deleteRecursively() else f.delete()
+                        val ok = when {
+                            Elevated.needed(f) -> Elevated.delete(f)   // restricted → shell rm (permanent)
+                            bin -> TrashBin.trash(activity, f)
+                            f.isDirectory -> f.deleteRecursively()
+                            else -> f.delete()
+                        }
                         if (!ok) fails++
                     }
                     activity.runOnUiThread {
@@ -309,4 +336,12 @@ object FileOps {
 
     private fun toast(activity: Activity, msg: String) =
         Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
+
+    /** Run a (possibly slow) elevated shell op off the UI thread, deliver result on it. */
+    private fun bg(activity: Activity, work: () -> Boolean, done: (Boolean) -> Unit) {
+        Thread {
+            val ok = try { work() } catch (e: Exception) { false }
+            activity.runOnUiThread { done(ok) }
+        }.start()
+    }
 }
