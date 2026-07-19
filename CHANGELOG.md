@@ -3,6 +3,14 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [3.1] — 2026-07-19 (versionCode 22)
+### Added
+- **Files-by-Google-style category list**: rounded thumbnails with play badge, `size • date` subtitles.
+- **Folder-source chips** (All + each source folder) and a **grid/list toggle** + search in the category toolbar.
+- **"Feature settings" bottom sheet** from the filter icon: Layout (List/Grid), Sort by (Name/Size/Time/Type), Sort order (Forward/Reverse), Display (hidden files).
+### Changed
+- Video player transport reordered to rewind · prev · play · next · forward; added a **Share** button.
+
 ## [3.0] — 2026-07-19 (versionCode 21)
 ### Changed
 - **HyperOS "Storage" home redesign**: top-right search/filter/overflow icon row + large per-tab title; 2×2 colored category tiles (Docs/Images/Videos/Music) with a Type/More expander; "Internal storage" header with a working new-folder button; folder rows restyled (larger icon, bold name, `date | N items`, chevron).
