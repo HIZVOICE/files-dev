@@ -14,4 +14,7 @@
         android:title="Grid / list"
         android:icon="@drawable/ic_grid"
         app:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_select" android:title="Select" app:showAsAction="never" />
+    <item android:id="@+id/action_select_date" android:title="Select by date" app:showAsAction="never" />
 </menu>

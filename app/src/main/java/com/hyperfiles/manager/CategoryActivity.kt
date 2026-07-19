@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.lifecycleScope
@@ -13,6 +15,7 @@ import com.google.android.material.chip.Chip
 import com.hyperfiles.manager.databinding.ActivityCategoryBinding
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.Calendar
 
 class CategoryActivity : AppCompatActivity() {
 
@@ -25,6 +28,7 @@ class CategoryActivity : AppCompatActivity() {
     private lateinit var category: FileCategory
 
     private var allFiles: List<File> = emptyList()
+    private var shown: List<File> = emptyList()
     private var currentFolder: String? = null
     private var query: String = ""
     private var useGrid = false
@@ -45,13 +49,24 @@ class CategoryActivity : AppCompatActivity() {
         mediaCategory = true
 
         setSupportActionBar(binding.toolbar)
-        binding.toolbar.setNavigationOnClickListener { finish() }
+        binding.toolbar.setNavigationOnClickListener {
+            if (adapter.selectionMode) exitSelectionUi() else finish()
+        }
         title = category.title
 
         adapter = FileAdapter(
             onClick = { OpenHelper.open(this, it) },
-            onMore = { f, v -> FileOps.showMenu(this, f, v) { reload() } }
+            onMore = { f, v -> FileOps.showMenu(this, f, v) { reload() } },
+            selectable = true   // long-press (or a tap in select mode) selects, doesn't open the menu
         )
+        adapter.onEnterSelectionMode = {
+            binding.toolbar.setNavigationIcon(R.drawable.ic_close)
+            invalidateOptionsMenu()
+        }
+        adapter.onSelectionChanged = { count ->
+            if (count == 0 && adapter.selectionMode) exitSelectionUi()
+            else { supportActionBar?.title = "$count selected"; supportActionBar?.subtitle = null }
+        }
         applyLayout()
 
         binding.swipe.setOnRefreshListener { FileScanner.invalidate(); reload() }
@@ -59,6 +74,10 @@ class CategoryActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        if (adapter.selectionMode) {
+            menuInflater.inflate(R.menu.selection_menu, menu)
+            return true
+        }
         menuInflater.inflate(R.menu.category_menu, menu)
         toggleItem = menu.findItem(R.id.action_view_toggle)
         toggleItem?.setIcon(if (useGrid) R.drawable.ic_list else R.drawable.ic_grid)
@@ -74,16 +93,69 @@ class CategoryActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_view_toggle -> {
-                useGrid = !useGrid
-                applyLayout()
-                applyFilter()
-                true
+        if (adapter.selectionMode) {
+            val sel = adapter.selectedList()
+            when (item.itemId) {
+                R.id.sel_share -> OpenHelper.shareMultiple(this, sel)
+                R.id.sel_copy -> { Clipboard.set(sel, false); toast("${sel.size} copied — open a folder and Paste"); exitSelectionUi() }
+                R.id.sel_move -> { Clipboard.set(sel, true); toast("${sel.size} cut — open a folder and Paste"); exitSelectionUi() }
+                R.id.sel_delete -> FileOps.deleteMultiple(this, sel) { exitSelectionUi(); reload() }
+                R.id.sel_compress_zip -> ArchiveBridge.compressZip(this, sel) { exitSelectionUi(); reload() }
+                R.id.sel_compress_7z -> ArchiveBridge.compress7z(this, sel) { exitSelectionUi(); reload() }
+                R.id.sel_checksum -> FileOps.checksumMultiple(this, sel)
+                R.id.sel_all -> adapter.selectAllVisible()
             }
+            return true
+        }
+        return when (item.itemId) {
+            R.id.action_view_toggle -> { useGrid = !useGrid; applyLayout(); applyFilter(); true }
+            R.id.action_select -> { adapter.enterSelectionMode(); true }
+            R.id.action_select_date -> { selectByDateDialog(); true }
             else -> super.onOptionsItemSelected(item)
         }
     }
+
+    override fun onBackPressed() {
+        if (adapter.selectionMode) exitSelectionUi() else super.onBackPressed()
+    }
+
+    private fun exitSelectionUi() {
+        adapter.exitSelection()
+        binding.toolbar.setNavigationIcon(R.drawable.ic_back)
+        supportActionBar?.title = category.title
+        supportActionBar?.subtitle = "${shown.size} items"
+        invalidateOptionsMenu()
+    }
+
+    private fun selectByDateDialog() {
+        val labels = arrayOf("Today", "Yesterday", "Last 7 days", "Last 30 days")
+        AlertDialog.Builder(this)
+            .setTitle("Select by date")
+            .setItems(labels) { _, which -> selectByRange(which) }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun selectByRange(which: Int) {
+        val startOfToday = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        val day = 24L * 60 * 60 * 1000
+        val now = System.currentTimeMillis()
+        val (from, to) = when (which) {
+            0 -> startOfToday to now                    // Today
+            1 -> (startOfToday - day) to startOfToday    // Yesterday
+            2 -> (now - 7 * day) to now                  // Last 7 days
+            else -> (now - 30 * day) to now              // Last 30 days
+        }
+        val matches = shown.filter { it.lastModified() in from until to || it.lastModified() == to }
+        if (matches.isEmpty()) { toast("Nothing from that range"); return }
+        adapter.selectOnly(matches)
+        toast("Selected ${matches.size}")
+    }
+
+    private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
     private fun applyLayout() {
         if (useGrid) {
@@ -145,8 +217,9 @@ class CategoryActivity : AppCompatActivity() {
             (currentFolder == null || f.parentFile?.name == currentFolder) &&
                 (q.isEmpty() || f.name.lowercase().contains(q))
         }
+        shown = filtered
         adapter.submit(filtered)
         binding.empty.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
-        supportActionBar?.subtitle = "${filtered.size} items"
+        if (!adapter.selectionMode) supportActionBar?.subtitle = "${filtered.size} items"
     }
 }

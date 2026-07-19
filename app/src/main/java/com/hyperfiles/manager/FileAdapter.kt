@@ -53,6 +53,14 @@ class FileAdapter(
         notifyDataSetChanged()
     }
 
+    /** Enter selection mode and select exactly [list] (used by "Select by date"). */
+    fun selectOnly(list: List<File>) {
+        enterSelectionMode()
+        selected.clear(); selected.addAll(list)
+        onSelectionChanged?.invoke(selected.size)
+        notifyDataSetChanged()
+    }
+
     fun selectedList(): List<File> = selected.toList()
 
     override fun getItemViewType(position: Int) = if (grid) 1 else if (media) 2 else 0

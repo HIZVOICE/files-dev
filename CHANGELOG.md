@@ -3,6 +3,13 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [3.9] — 2026-07-20 (versionCode 30)
+### Added
+- **Multi-select in the media/category screen.** Long-press (or the new "Select" menu action) now enters selection mode instead of opening the options menu; a selection toolbar shows the count plus Share, Copy, Move, Delete, Compress (ZIP/7z), Checksum, and Select all. Tapping toggles items.
+- **Select by date.** New "Select by date" action selects all items in the current view from **Today / Yesterday / Last 7 days / Last 30 days** at once (e.g. all of yesterday's photos).
+### Notes
+- Share is available both in the per-file options menu and the multi-select toolbar.
+
 ## [3.8] — 2026-07-20 (versionCode 29)
 ### Added
 - **File operations inside Android/data.** Copy, Move (paste), Delete, Rename and New folder now run through the elevated shell (Shizuku or root) whenever the source, destination, or folder is a restricted path — previously only browse/open worked there. `Elevated` gained `delete`/`rename`/`mkdir`/`copyInto`/`moveInto` and a `needed()` check; slow ops run off the UI thread. Deletes of restricted items are permanent (the app recycle bin can't reach `Android/data`).
