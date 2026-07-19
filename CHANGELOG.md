@@ -3,6 +3,11 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [3.0] — 2026-07-19 (versionCode 21)
+### Changed
+- **HyperOS "Storage" home redesign**: top-right search/filter/overflow icon row + large per-tab title; 2×2 colored category tiles (Docs/Images/Videos/Music) with a Type/More expander; "Internal storage" header with a working new-folder button; folder rows restyled (larger icon, bold name, `date | N items`, chevron).
+- Renamed the Home tab to **Storage** (Recent and Devs retained).
+
 ## [2.9] — 2026-07-19 (versionCode 20)
 ### Added
 - **payload.bin support** for custom ROMs: `PayloadDumper` parses the A/B OTA CrAU format; `PayloadActivity` lists partitions and extracts full-OTA images (REPLACE / REPLACE_XZ / REPLACE_BZ / ZERO), marking incremental payloads as unsupported.
