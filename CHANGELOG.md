@@ -3,6 +3,13 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [3.4] — 2026-07-20 (versionCode 25)
+### Changed
+- **Playlist → Material bottom sheet** (24dp top corners, `surfaceContainerLow`, grab handle, swipe-to-dismiss; no Close button). Current track highlighted.
+- **Audio art container** redesigned: 248dp / 28dp-rounded card, drop shadow + soft radial glow, embedded album art, subtle gradient placeholder when art is missing.
+- **Seek bar → Material 3 `Slider`** (8dp softened track, halo thumb); time counters regrouped directly beneath the track.
+- **Video overlay**: prev/play/next wrapped in a translucent glass pill; on-screen rewind/forward buttons removed (10s skip is double-tap on the left/right half).
+
 ## [3.3] — 2026-07-20 (versionCode 24)
 ### Added
 - **MediaStyle media notifications** backed by a `MediaSession` for both audio and video: title, album art, prev/play-pause/next, and an interactive **seek-bar scrubber** (Android 10+) with elapsed/total times. Lock-screen controls; system controls drive play/pause/seek/next/prev via session callbacks. (`androidx.media`)
