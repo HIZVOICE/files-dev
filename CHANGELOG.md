@@ -3,6 +3,13 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [3.5] — 2026-07-20 (versionCode 26)
+### Added
+- **HyperOS "Liquid Engine" spring press.** Rewrote `PressScale` on top of `androidx.dynamicanimation` `SpringAnimation`: shrinks to 0.94x on touch-down (stiff, near-critical) and springs back to 1.0x with an underdamped **0.45 damping-ratio overshoot** on release.
+  - Interruptible (`animateToFinalPosition` retargets in-flight and preserves velocity).
+  - Click-safe (touch listener never consumes events; clicks, long-press and ripple still fire).
+  - Applied app-wide (file/folder rows, category tiles, dev tiles, cards) via the unchanged `attach()` API; attaches once per recycled view.
+
 ## [3.4] — 2026-07-20 (versionCode 25)
 ### Changed
 - **Playlist → Material bottom sheet** (24dp top corners, `surfaceContainerLow`, grab handle, swipe-to-dismiss; no Close button). Current track highlighted.
