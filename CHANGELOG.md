@@ -3,6 +3,13 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [3.2] — 2026-07-19 (versionCode 23)
+### Changed
+- **Media rows + thumbnails everywhere** — Audio, Documents, Archives and Apps categories now use the rich media row.
+### Added
+- Best-effort **embedded album-art thumbnails** for audio (cached, background loader, recycling-safe).
+- Centered file-type thumbnails for non-media files.
+
 ## [3.1] — 2026-07-19 (versionCode 22)
 ### Added
 - **Files-by-Google-style category list**: rounded thumbnails with play badge, `size • date` subtitles.
