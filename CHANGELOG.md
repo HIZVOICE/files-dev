@@ -3,6 +3,10 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [3.3] — 2026-07-20 (versionCode 24)
+### Added
+- **MediaStyle media notifications** backed by a `MediaSession` for both audio and video: title, album art, prev/play-pause/next, and an interactive **seek-bar scrubber** (Android 10+) with elapsed/total times. Lock-screen controls; system controls drive play/pause/seek/next/prev via session callbacks. (`androidx.media`)
+
 ## [3.2] — 2026-07-19 (versionCode 23)
 ### Changed
 - **Media rows + thumbnails everywhere** — Audio, Documents, Archives and Apps categories now use the rich media row.
