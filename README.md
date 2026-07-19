@@ -4,6 +4,20 @@ A power-user Android file manager for the AOSP / custom-ROM community — an all
 
 `com.hyperfiles.manager` · Kotlin + XML Views + Material 3 · minSdk 24 · compile/target SDK 36
 
+[![Release](https://img.shields.io/github/v/release/HIZVOICE/files-dev?sort=semver&label=release)](https://github.com/HIZVOICE/files-dev/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/HIZVOICE/files-dev/total?label=APK%20downloads)](https://github.com/HIZVOICE/files-dev/releases)
+
+## Downloads
+
+Latest debug build — **v3.6**:
+
+| ABI | Device | Download |
+|-----|--------|----------|
+| `arm64-v8a` | Modern phones (2018+) — pick this | [FilesDev-3.6-arm64.apk](https://pub.hyperagent.com/api/published/pbf01KXY92QK0_J84W04EBG08HPGSJ/FilesDev-3.6-arm64.apk) |
+| `armeabi-v7a` | Older 32-bit devices | [FilesDev-3.6-arm32.apk](https://pub.hyperagent.com/api/published/pbf01KXY92RBX_KY5KG9PTCQ2RQRX9/FilesDev-3.6-arm32.apk) |
+
+All versions (v2.9 → v3.6) with APK assets are on the **[Releases page](https://github.com/HIZVOICE/files-dev/releases)**. Debug-signed builds for development/testing.
+
 ## Features
 
 - **All-codec playback** (libVLC) for video and audio, with background playback, resume, gesture controls, and MediaStyle notifications (lock-screen scrubber on Android 10+).
