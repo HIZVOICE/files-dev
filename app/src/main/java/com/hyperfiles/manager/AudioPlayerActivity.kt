@@ -4,12 +4,15 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.text.TextUtils
 import android.util.TypedValue
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -51,6 +54,7 @@ class AudioPlayerActivity : AppCompatActivity(), PlaybackService.Listener {
         override fun onServiceDisconnected(name: ComponentName?) { service = null; bound = false }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Theming.applyActivityTheme(this)
@@ -58,6 +62,16 @@ class AudioPlayerActivity : AppCompatActivity(), PlaybackService.Listener {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         binding.toolbar.setNavigationOnClickListener { finish() }
+
+        // Swipe across the album art to change track (left = next, right = previous).
+        val gd = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
+                if (e1 == null || kotlin.math.abs(vx) < 900 || kotlin.math.abs(vx) <= kotlin.math.abs(vy)) return false
+                if (vx < 0) service?.next() else service?.prev()
+                return true
+            }
+        })
+        binding.artArea.setOnTouchListener { _, ev -> gd.onTouchEvent(ev) }
 
         val file = IntentInput.resolveToFile(this, intent)
         if (file == null) { finish(); return }

@@ -52,6 +52,7 @@ class PlayerActivity : AppCompatActivity(), VideoService.Listener {
 
     private enum class G { NONE, SEEK, BRIGHTNESS, VOLUME }
     private var gestureMode = G.NONE
+    private var flung = false
     private var seekStartMs = 0L
     private var seekTargetMs = 0L
     private var startBrightness = 0.5f
@@ -199,6 +200,7 @@ class PlayerActivity : AppCompatActivity(), VideoService.Listener {
         val gd = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDown(e: MotionEvent): Boolean {
                 gestureMode = G.NONE
+                flung = false
                 seekStartMs = service?.currentTime() ?: 0L
                 seekTargetMs = seekStartMs
                 startBrightness = currentBrightness()
@@ -209,6 +211,16 @@ class PlayerActivity : AppCompatActivity(), VideoService.Listener {
             override fun onDoubleTap(e: MotionEvent): Boolean {
                 if (e.x < binding.root.width / 2f) seekRelative(-10_000) else seekRelative(10_000)
                 return true
+            }
+            override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
+                // A fast horizontal flick changes track (distinct from a slow drag = seek).
+                if (e1 != null && abs(vx) > 2500 && abs(vx) > abs(vy) * 2) {
+                    flung = true
+                    if (vx < 0) service?.next() else service?.prev()
+                    if (!controlsVisible) setControls(true) else scheduleHide()
+                    return true
+                }
+                return false
             }
             override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dX: Float, dY: Float): Boolean {
                 if (e1 == null) return false
@@ -241,7 +253,7 @@ class PlayerActivity : AppCompatActivity(), VideoService.Listener {
         binding.root.setOnTouchListener { _, ev ->
             gd.onTouchEvent(ev)
             if (ev.actionMasked == MotionEvent.ACTION_UP || ev.actionMasked == MotionEvent.ACTION_CANCEL) {
-                if (gestureMode == G.SEEK && duration > 0) {
+                if (gestureMode == G.SEEK && duration > 0 && !flung) {
                     service?.seekTo(seekTargetMs)
                     if (!controlsVisible) setControls(true) else scheduleHide()
                 }

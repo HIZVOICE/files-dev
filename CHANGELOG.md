@@ -3,6 +3,10 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [4.0] — 2026-07-20 (versionCode 31)
+### Added
+- **Swipe to change track / photo.** A fast horizontal flick now switches items: **swipe left = next, swipe right = previous** in the video player, the audio player (swipe across the album art), and the photo viewer. The photo viewer pages through sibling images in the folder with a slide animation and an "n / total" counter. In the video player the flick is tuned to be distinct from the horizontal drag-to-seek gesture and suppresses the seek when a flick is detected.
+
 ## [3.9] — 2026-07-20 (versionCode 30)
 ### Added
 - **Multi-select in the media/category screen.** Long-press (or the new "Select" menu action) now enters selection mode instead of opening the options menu; a selection toolbar shows the count plus Share, Copy, Move, Delete, Compress (ZIP/7z), Checksum, and Select all. Tapping toggles items.
