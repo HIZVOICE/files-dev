@@ -66,8 +66,11 @@ class AudioPlayerActivity : AppCompatActivity(), PlaybackService.Listener {
         // Swipe across the album art to change track (left = next, right = previous).
         val gd = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
-                if (e1 == null || kotlin.math.abs(vx) < 900 || kotlin.math.abs(vx) <= kotlin.math.abs(vy)) return false
-                if (vx < 0) service?.next() else service?.prev()
+                if (e1 == null) return false
+                val ax = kotlin.math.abs(vx); val ay = kotlin.math.abs(vy)
+                if (ay > ax && vy > 1400) { dismissDown(); return true }        // swipe down = close
+                if (ax < 900 || ax <= ay) return false
+                if (vx < 0) service?.next() else service?.prev()                // left = next, right = prev
                 return true
             }
         })
@@ -184,6 +187,12 @@ class AudioPlayerActivity : AppCompatActivity(), PlaybackService.Listener {
     private fun fmt(ms: Long): String {
         val s = ms / 1000; val h = s / 3600; val m = (s % 3600) / 60; val sec = s % 60
         return if (h > 0) String.format("%d:%02d:%02d", h, m, sec) else String.format("%d:%02d", m, sec)
+    }
+
+    private fun dismissDown() {
+        val v = binding.root
+        v.animate().translationY(v.height.toFloat()).alpha(0f).setDuration(200)
+            .withEndAction { finish(); overridePendingTransition(0, 0) }.start()
     }
 
     override fun onDestroy() {

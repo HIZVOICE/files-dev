@@ -134,6 +134,12 @@ class PlayerActivity : AppCompatActivity(), VideoService.Listener {
         })
     }
 
+    private fun dismissDown() {
+        val v = binding.root
+        v.animate().translationY(v.height.toFloat()).alpha(0f).setDuration(200)
+            .withEndAction { finish(); overridePendingTransition(0, 0) }.start()
+    }
+
     private fun seekRelative(deltaMs: Long) {
         val t = ((service?.currentTime() ?: 0L) + deltaMs).coerceIn(0, if (duration > 0) duration else Long.MAX_VALUE)
         service?.seekTo(t)
@@ -213,8 +219,16 @@ class PlayerActivity : AppCompatActivity(), VideoService.Listener {
                 return true
             }
             override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
+                if (e1 == null) return false
+                // A fast, near-vertical downward flick closes the player (distinct from the
+                // slower vertical brightness/volume drags).
+                if (abs(vy) > abs(vx) * 2 && vy > 3000) {
+                    flung = true
+                    dismissDown()
+                    return true
+                }
                 // A fast horizontal flick changes track (distinct from a slow drag = seek).
-                if (e1 != null && abs(vx) > 2500 && abs(vx) > abs(vy) * 2) {
+                if (abs(vx) > 2500 && abs(vx) > abs(vy) * 2) {
                     flung = true
                     if (vx < 0) service?.next() else service?.prev()
                     if (!controlsVisible) setControls(true) else scheduleHide()
