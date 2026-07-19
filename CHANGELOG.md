@@ -3,6 +3,11 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [3.6] — 2026-07-20 (versionCode 27)
+### Added
+- **Shizuku access for Android/data.** New Dev-tab "Android/data" tile pings the Shizuku service, requests permission, and then browses the OS-restricted `Android/data` / `Android/obb` trees (blocked by scoped storage on Android 11+) via an ADB-privileged shell.
+- New `Elevated` shell backend that transparently picks **Shizuku** (when granted) or **root** (`su`): restricted/unreadable folders now list through it instead of bouncing to the SAF picker, and restricted files are copied out via the elevated shell so viewers can open them. `ShizukuProvider` + `moe.shizuku.manager.permission.API_V23` added; `dev.rikka.shizuku:api`/`provider` dependencies.
+
 ## [3.5] — 2026-07-20 (versionCode 26)
 ### Added
 - **HyperOS "Liquid Engine" spring press.** Rewrote `PressScale` on top of `androidx.dynamicanimation` `SpringAnimation`: shrinks to 0.94x on touch-down (stiff, near-critical) and springs back to 1.0x with an underdamped **0.45 damping-ratio overshoot** on release.
