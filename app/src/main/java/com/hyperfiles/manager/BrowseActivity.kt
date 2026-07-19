@@ -38,6 +38,9 @@ class BrowseActivity : AppCompatActivity() {
     private var openSearch = false
     private var showHidden = false
     private val rootDirPaths = HashSet<String>()
+    private val elevSizes = HashMap<String, Long>()
+    // Matches a toybox `ls -lA` row: perms(+optional SELinux flag) links owner group size date time name
+    private val lsLine = Regex("""^([bcdlps-][rwxsStT-]{9})\S*\s+\d+\s+\S+\s+\S+\s+(\d+)\s+\S+\s+\S+\s+(.+)$""")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +72,7 @@ class BrowseActivity : AppCompatActivity() {
         }
         adapter.onSelectionChanged = { count -> onSelectionCount(count) }
         adapter.isDirOverride = { rootDirPaths.contains(it.absolutePath) }
+        adapter.sizeOverride = { elevSizes[it.absolutePath] }
         applyLayoutManager()
         binding.list.adapter = adapter
 
@@ -101,9 +105,9 @@ class BrowseActivity : AppCompatActivity() {
     /** Restricted files (e.g. under Android/data) can't be opened directly — copy them
      *  out with the elevated shell first, then hand the readable copy to the viewer. */
     private fun openViaElevated(f: File) {
-        Toast.makeText(this, "Reading via ${Elevated.label()}…", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Copying via ${Elevated.label()}…", Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
-            val copy = withContext(Dispatchers.IO) { Elevated.copyToCache(f, cacheDir) }
+            val copy = withContext(Dispatchers.IO) { Elevated.copyOut(f) }
             if (copy != null) OpenHelper.open(this@BrowseActivity, copy)
             else Toast.makeText(this@BrowseActivity, "Couldn't read this file", Toast.LENGTH_SHORT).show()
         }
@@ -256,13 +260,23 @@ class BrowseActivity : AppCompatActivity() {
 
     private fun elevatedList(dir: File): MutableList<File> {
         val out = mutableListOf<File>()
-        val r = Elevated.sh("ls -Ap \"${dir.absolutePath}\"")
+        elevSizes.clear()
+        // `ls -lA` carries sizes + a type flag; File.length()/isDirectory are 0/false for
+        // restricted entries the app can't stat, so we parse them from the shell instead.
+        val r = Elevated.sh("ls -lA \"${dir.absolutePath}\"")
         if (r.ok) {
-            r.stdout.lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.forEach { line ->
-                val isDir = line.endsWith("/")
-                val nm = line.trimEnd('/')
-                val f = File(dir, nm)
-                if (isDir) rootDirPaths.add(f.absolutePath)
+            r.stdout.lineSequence().forEach { raw ->
+                val line = raw.trimEnd()
+                if (line.isBlank() || line.startsWith("total ")) return@forEach
+                val m = lsLine.find(line) ?: return@forEach
+                val perms = m.groupValues[1]
+                val size = m.groupValues[2].toLongOrNull() ?: 0L
+                var name = m.groupValues[3]
+                if (" -> " in name) name = name.substringBefore(" -> ")   // strip symlink target
+                if (name == "." || name == "..") return@forEach
+                val f = File(dir, name)
+                if (perms.startsWith("d")) rootDirPaths.add(f.absolutePath)
+                else elevSizes[f.absolutePath] = size
                 out.add(f)
             }
         }

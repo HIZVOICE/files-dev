@@ -24,6 +24,8 @@ class FileAdapter(
     val selected = LinkedHashSet<File>()
     /** Lets the browser mark root-only paths as directories (File.isDirectory can't stat them). */
     var isDirOverride: ((File) -> Boolean)? = null
+    /** Lets the browser supply sizes for files it listed via an elevated shell (File.length()==0). */
+    var sizeOverride: ((File) -> Long?)? = null
     var onSelectionChanged: ((Int) -> Unit)? = null
     var onEnterSelectionMode: (() -> Unit)? = null
 
@@ -121,13 +123,14 @@ class FileAdapter(
                 playBadge?.visibility = View.GONE
             }
             info?.let {
+                val len = sizeOverride?.invoke(f) ?: f.length()
                 it.text = when {
                     dir -> {
                         val n = f.listFiles()?.size ?: 0
                         "${StorageUtil.shortStamp(f.lastModified())}  |  $n ${if (n == 1) "item" else "items"}"
                     }
-                    media -> "${StorageUtil.formatSize(f.length())}  •  ${StorageUtil.mediumDate(f.lastModified())}"
-                    else -> "${StorageUtil.shortStamp(f.lastModified())}  |  ${StorageUtil.formatSize(f.length())}"
+                    media -> "${StorageUtil.formatSize(len)}  •  ${StorageUtil.mediumDate(f.lastModified())}"
+                    else -> "${StorageUtil.shortStamp(f.lastModified())}  |  ${StorageUtil.formatSize(len)}"
                 }
             }
 

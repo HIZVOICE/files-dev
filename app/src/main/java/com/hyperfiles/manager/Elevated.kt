@@ -32,10 +32,22 @@ object Elevated {
         Backend.NONE -> RootShell.sh(command)
     }
 
-    /** Copy a normally-unreadable file into a readable cache location via the elevated shell. */
-    fun copyToCache(source: File, cacheDir: File): File? {
-        val dest = File(cacheDir, "elev_${source.name}")
-        val r = sh("cat '${source.absolutePath}' > '${dest.absolutePath}' && chmod 666 '${dest.absolutePath}'")
-        return if (r.ok && dest.exists()) dest else null
+    /**
+     * Copy a normally-unreadable file (e.g. under Android/data) to a shell-writable,
+     * app-readable temp dir on shared storage, then return the readable copy.
+     *
+     * The app's private cache (/data/data/<pkg>) does NOT work for the Shizuku backend,
+     * which runs as the shell uid (2000) and can't write there — only root could. A
+     * /sdcard temp dir is writable by the shell uid and readable by the app (which holds
+     * all-files access), so it works for both Shizuku and root.
+     */
+    fun copyOut(source: File): File? {
+        val tmp = File(StorageUtil.primaryStorage(), "FilesDevTmp").apply { mkdirs() }
+        val dest = File(tmp, source.name)
+        try { if (dest.exists()) dest.delete() } catch (_: Exception) {}
+        val s = source.absolutePath.replace("'", "'\\''")
+        val d = dest.absolutePath.replace("'", "'\\''")
+        sh("cp -f '$s' '$d' && chmod 0666 '$d'")
+        return if (dest.exists() && dest.length() > 0) dest else null
     }
 }

@@ -3,6 +3,10 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [3.7] — 2026-07-20 (versionCode 28)
+### Fixed
+- **Android/data via Shizuku:** opening a file (e.g. a video) failed with "couldn't read file" and every entry showed **0 MB**. The elevated copy-out now targets a shell-writable, app-readable temp dir on shared storage (`/sdcard/FilesDevTmp`) instead of the app's private cache — the Shizuku shell uid (2000) can't write into `/data/data/<pkg>` (only root could). Sizes are now parsed from `ls -lA` (the app can't `stat` restricted entries, so `File.length()` returned 0).
+
 ## [3.6] — 2026-07-20 (versionCode 27)
 ### Added
 - **Shizuku access for Android/data.** New Dev-tab "Android/data" tile pings the Shizuku service, requests permission, and then browses the OS-restricted `Android/data` / `Android/obb` trees (blocked by scoped storage on Android 11+) via an ADB-privileged shell.
