@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorSurface"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="18dp"
+        android:paddingBottom="24dp">
+
+        <View
+            android:layout_width="36dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/bg_search_pill"
+            android:backgroundTint="@color/divider" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:text="View settings"
+            android:textColor="@color/text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <!-- View / Layout -->
+        <TextView style="@style/SheetSection" android:text="Layout" />
+
+        <LinearLayout android:id="@+id/rowLayoutList" style="@style/SheetRow">
+            <TextView style="@style/SheetRowLabel" android:text="List" />
+            <ImageView android:id="@+id/checkLayoutList" style="@style/SheetRowCheck" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/rowLayoutGrid" style="@style/SheetRow">
+            <TextView style="@style/SheetRowLabel" android:text="Grid" />
+            <ImageView android:id="@+id/checkLayoutGrid" style="@style/SheetRowCheck" />
+        </LinearLayout>
+
+        <!-- Sort by -->
+        <TextView style="@style/SheetSection" android:text="Sort by" />
+
+        <LinearLayout android:id="@+id/rowSortName" style="@style/SheetRow">
+            <TextView style="@style/SheetRowLabel" android:text="Name" />
+            <ImageView android:id="@+id/checkSortName" style="@style/SheetRowCheck" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/rowSortSize" style="@style/SheetRow">
+            <TextView style="@style/SheetRowLabel" android:text="Size" />
+            <ImageView android:id="@+id/checkSortSize" style="@style/SheetRowCheck" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/rowSortTime" style="@style/SheetRow">
+            <TextView style="@style/SheetRowLabel" android:text="Time modified" />
+            <ImageView android:id="@+id/checkSortTime" style="@style/SheetRowCheck" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/rowSortType" style="@style/SheetRow">
+            <TextView style="@style/SheetRowLabel" android:text="Type" />
+            <ImageView android:id="@+id/checkSortType" style="@style/SheetRowCheck" />
+        </LinearLayout>
+
+        <!-- Sort order -->
+        <TextView style="@style/SheetSection" android:text="Sort order" />
+
+        <LinearLayout android:id="@+id/rowOrderForward" style="@style/SheetRow">
+            <TextView style="@style/SheetRowLabel" android:text="Forward" />
+            <ImageView android:id="@+id/checkOrderForward" style="@style/SheetRowCheck" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/rowOrderReverse" style="@style/SheetRow">
+            <TextView style="@style/SheetRowLabel" android:text="Reverse" />
+            <ImageView android:id="@+id/checkOrderReverse" style="@style/SheetRowCheck" />
+        </LinearLayout>
+
+        <!-- Display -->
+        <TextView style="@style/SheetSection" android:text="Display" />
+
+        <LinearLayout android:id="@+id/rowDisplayAll" style="@style/SheetRow">
+            <TextView style="@style/SheetRowLabel" android:text="Visible files only" />
+            <ImageView android:id="@+id/checkDisplayAll" style="@style/SheetRowCheck" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/rowDisplayHidden" style="@style/SheetRow">
+            <TextView style="@style/SheetRowLabel" android:text="Show hidden files" />
+            <ImageView android:id="@+id/checkDisplayHidden" style="@style/SheetRowCheck" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

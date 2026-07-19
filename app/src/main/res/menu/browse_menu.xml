@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_search"
+        android:title="Search"
+        android:icon="@drawable/ic_search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
+
+    <item
+        android:id="@+id/action_view_toggle"
+        android:title="Toggle view"
+        android:icon="@drawable/ic_grid"
+        app:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_sort" android:title="Sort" app:showAsAction="never">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item android:id="@+id/sort_name" android:title="Name" android:checked="true" />
+                <item android:id="@+id/sort_date" android:title="Date modified" />
+                <item android:id="@+id/sort_size" android:title="Size" />
+                <item android:id="@+id/sort_type" android:title="Type" />
+            </group>
+            <item android:id="@+id/sort_asc" android:title="Ascending" android:checkable="true" android:checked="true" />
+        </menu>
+    </item>
+
+    <item android:id="@+id/action_hidden" android:title="Show hidden files" android:checkable="true" android:checked="false" app:showAsAction="never" />
+    <item android:id="@+id/action_new_folder" android:title="New folder" app:showAsAction="never" />
+    <item android:id="@+id/action_paste" android:title="Paste" app:showAsAction="never" />
+</menu>

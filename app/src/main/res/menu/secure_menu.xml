@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/action_change_lock" android:title="Change lock" app:showAsAction="never" />
+    <item android:id="@+id/action_toggle_fp" android:title="Toggle fingerprint" app:showAsAction="never" />
+</menu>
