@@ -3,6 +3,14 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [4.9] — 2026-07-20 (versionCode 40)
+### Removed
+- **Quick access row** removed from the Storage tab.
+- **Pull-to-refresh removed from the Storage tab** (it was triggering on swipe); the internal list refreshes on resume / navigation instead.
+- **Storage analyzer removed** (screen + button).
+### Changed
+- Recent tab now shows a **display-only circular storage-usage ring** (percent used, with used / total) — no navigation or other function.
+
 ## [4.8] — 2026-07-20 (versionCode 39)
 ### Fixed
 - **Android/data sizes & empty folders.** The elevated `ls -lA` parser is now robust across device formats (toybox ISO date vs. coreutils month name), so files show their **real size**. Restricted folders no longer display a bogus **"0 items"** — they show "Folder" and open normally.

@@ -159,12 +159,7 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <!-- STORAGE TAB: pull-to-refresh + categories (collapsing) + internal storage folders -->
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/homeSwipe"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
+        <!-- STORAGE TAB: categories (collapsing) + internal storage folders -->
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:id="@+id/homeContainer"
             android:layout_width="match_parent"
@@ -183,33 +178,6 @@
                     android:orientation="vertical"
                     android:paddingHorizontal="16dp"
                     app:layout_scrollFlags="scroll|snap">
-
-                    <!-- Quick access shortcuts -->
-                    <TextView
-                        android:id="@+id/quickAccessLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="6dp"
-                        android:layout_marginTop="6dp"
-                        android:text="Quick access"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp" />
-
-                    <HorizontalScrollView
-                        android:id="@+id/quickAccessScroll"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:scrollbars="none"
-                        android:clipToPadding="false">
-
-                        <com.google.android.material.chip.ChipGroup
-                            android:id="@+id/quickAccessRow"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:paddingHorizontal="4dp"
-                            app:singleLine="true" />
-                    </HorizontalScrollView>
 
                     <!-- Type / More row -->
                     <LinearLayout
@@ -310,7 +278,6 @@
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 android:layoutAnimation="@anim/layout_animation_fall_down" />
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <!-- RECENT TAB -->
         <LinearLayout
@@ -320,15 +287,51 @@
             android:orientation="vertical"
             android:visibility="gone">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/analyzerBtn"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="match_parent"
+            <!-- Storage usage ring (display only) -->
+            <FrameLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="10dp"
-                android:layout_marginTop="10dp"
-                app:icon="@drawable/ic_storage"
-                android:text="Storage analyzer" />
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="18dp"
+                android:layout_marginBottom="8dp">
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/storageRing"
+                    android:layout_width="152dp"
+                    android:layout_height="152dp"
+                    android:layout_gravity="center"
+                    android:indeterminate="false"
+                    app:indicatorSize="152dp"
+                    app:trackThickness="12dp"
+                    app:trackCornerRadius="6dp"
+                    app:indicatorColor="@color/hyper_blue"
+                    app:trackColor="@color/divider" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/storagePct"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textColor="@color/text_primary"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/storageUsed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"

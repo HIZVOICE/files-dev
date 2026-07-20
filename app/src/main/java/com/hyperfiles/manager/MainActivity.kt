@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.chip.Chip
 import com.hyperfiles.manager.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -98,12 +97,6 @@ class MainActivity : AppCompatActivity() {
         Bounce.attach(binding.recentsList)
         hideNavOnScroll(binding.homeFiles)
         hideNavOnScroll(binding.recentsList)
-        binding.homeSwipe.setOnRefreshListener {
-            FileScanner.invalidate()
-            loadHomeFiles()
-            loadCategoriesAndRecents()
-            binding.homeSwipe.isRefreshing = false
-        }
 
         binding.searchButton.setOnClickListener { v ->
             tap(v) {
@@ -136,7 +129,6 @@ class MainActivity : AppCompatActivity() {
             selList()?.let { FileOps.deleteMultiple(this, it) { exitSelection(); refresh() } }
         }
         binding.selAllBtn.setOnClickListener { selAdapter?.selectAllVisible() }
-        binding.analyzerBtn.setOnClickListener { v -> tap(v) { startActivity(Intent(this, StorageAnalyzerActivity::class.java)) } }
 
         binding.bottomNav.setOnItemSelectedListener { item ->
             if (selAdapter != null) exitSelection()
@@ -158,7 +150,7 @@ class MainActivity : AppCompatActivity() {
         binding.headerBar.visibility = if (access) View.VISIBLE else View.GONE
         binding.bottomNav.visibility = if (access) View.VISIBLE else View.GONE
         if (!access) {
-            binding.homeSwipe.visibility = View.GONE
+            binding.homeContainer.visibility = View.GONE
             binding.recentContainer.visibility = View.GONE
             binding.devsContainer.visibility = View.GONE
             // Auto-prompt for storage access on first launch after install
@@ -175,13 +167,13 @@ class MainActivity : AppCompatActivity() {
             binding.bottomNav.selectedItemId = R.id.nav_home
         }
         applyTabVisibility()
-        buildQuickAccess()
+        updateStorageRing()
         loadHomeFiles()
         loadCategoriesAndRecents()
     }
 
     private fun applyTabVisibility() {
-        binding.homeSwipe.visibility = if (currentTab == R.id.nav_home) View.VISIBLE else View.GONE
+        binding.homeContainer.visibility = if (currentTab == R.id.nav_home) View.VISIBLE else View.GONE
         binding.recentContainer.visibility = if (currentTab == R.id.nav_recent) View.VISIBLE else View.GONE
         binding.devsContainer.visibility = if (currentTab == R.id.nav_devs) View.VISIBLE else View.GONE
         binding.bigTitle.text = when (currentTab) {
@@ -241,34 +233,11 @@ class MainActivity : AppCompatActivity() {
         if (selAdapter != null) exitSelection() else super.onBackPressed()
     }
 
-    private fun buildQuickAccess() {
-        val primary = StorageUtil.primaryStorage()
-        val shortcuts = listOf(
-            "Downloads" to StorageUtil.downloadsDir(),
-            "Camera" to File(primary, "DCIM"),
-            "Pictures" to File(primary, "Pictures"),
-            "Screenshots" to File(primary, "Pictures/Screenshots"),
-            "Documents" to File(primary, "Documents"),
-            "Movies" to File(primary, "Movies"),
-            "Music" to File(primary, "Music")
-        )
-        val row = binding.quickAccessRow
-        row.removeAllViews()
-        var any = false
-        for ((label, dir) in shortcuts) {
-            if (!dir.exists() || !dir.isDirectory) continue
-            any = true
-            val chip = Chip(this).apply {
-                text = label
-                isCheckable = false
-                isClickable = true
-                setOnClickListener { v -> tap(v) { browse(dir.absolutePath) } }
-            }
-            row.addView(chip)
-        }
-        val vis = if (any) View.VISIBLE else View.GONE
-        binding.quickAccessLabel.visibility = vis
-        binding.quickAccessScroll.visibility = vis
+    private fun updateStorageRing() {
+        val u = StorageUtil.usageOf(StorageUtil.primaryStorage())
+        binding.storageRing.setProgressCompat(u.percentUsed, true)
+        binding.storagePct.text = "${u.percentUsed}%"
+        binding.storageUsed.text = "${StorageUtil.formatSize(u.used)} / ${StorageUtil.formatSize(u.total)}"
     }
 
     private fun browse(path: String) {
