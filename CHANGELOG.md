@@ -3,6 +3,10 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [5.9.1] — 2026-07-20 (versionCode 51)
+### Changed
+- **Glossier launcher icon.** Enriched the adaptive icon's vector foreground: a layered lime→green→olive folder gradient, a translucent **glossy highlight sweep** across the upper folder face, and the embossed Android robot now has a top-to-bottom gradient, a **soft drop shadow** beneath it, and a specular highlight along the top of its head — much closer to the glossy reference while staying a crisp, scalable vector.
+
 ## [5.9] — 2026-07-20 (versionCode 50)
 ### Changed
 - **Android 17 (API 37) support.** The app now compiles against and **targets Android 17** — `compileSdk 37`, `targetSdk 37`, Build-Tools 37.0.0 (minSdk stays 24, so Android 7.0+ is still supported). Installed the `android-37` platform + Build-Tools 37.
