@@ -137,6 +137,7 @@
         <activity android:name=".SysInfoActivity" android:exported="false" />
         <activity android:name=".SettingsActivity" android:exported="false" />
         <activity android:name=".DuplicatesActivity" android:exported="false" />
+        <activity android:name=".StorageAnalyzerActivity" android:exported="false" />
         <activity android:name=".RecycleBinActivity" android:exported="false" />
         <activity android:name=".LockActivity" android:exported="false"
             android:excludeFromRecents="true" />

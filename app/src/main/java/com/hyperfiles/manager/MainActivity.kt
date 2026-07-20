@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private var sortBy = Sorting.By.NAME
     private var sortAsc = true
     private var homeGrid = false
+    private var selAdapter: FileAdapter? = null
     private var categoriesExpanded = false
     private val primaryCount = 4
 
@@ -75,14 +76,20 @@ class MainActivity : AppCompatActivity() {
 
         homeFilesAdapter = FileAdapter(
             onClick = { onFile(it) },
-            onMore = { f, v -> FileOps.showMenu(this, f, v) { loadHomeFiles() } }
+            onMore = { f, v -> FileOps.showMenu(this, f, v) { loadHomeFiles() } },
+            selectable = true
         )
+        homeFilesAdapter.onEnterSelectionMode = { enterSelection(homeFilesAdapter) }
+        homeFilesAdapter.onSelectionChanged = { c -> onSelectionCount(c) }
         applyHomeLayout()
 
         recentsAdapter = FileAdapter(
             onClick = { OpenHelper.open(this, it) },
-            onMore = { f, v -> FileOps.showMenu(this, f, v) { loadCategoriesAndRecents() } }
+            onMore = { f, v -> FileOps.showMenu(this, f, v) { loadCategoriesAndRecents() } },
+            selectable = true
         )
+        recentsAdapter.onEnterSelectionMode = { enterSelection(recentsAdapter) }
+        recentsAdapter.onSelectionChanged = { c -> onSelectionCount(c) }
         binding.recentsList.layoutManager = LinearLayoutManager(this)
         binding.recentsList.adapter = recentsAdapter
 
@@ -104,7 +111,23 @@ class MainActivity : AppCompatActivity() {
         binding.recycleBinBtn.setOnClickListener { v -> tap(v) { startActivity(Intent(this, RecycleBinActivity::class.java)) } }
         binding.secureButton.setOnClickListener { v -> tap(v) { startActivity(Intent(this, LockActivity::class.java)) } }
 
+        binding.selClose.setOnClickListener { exitSelection() }
+        binding.selShareBtn.setOnClickListener { selList()?.let { OpenHelper.shareMultiple(this, it) } }
+        binding.selCopyBtn.setOnClickListener {
+            selList()?.let {
+                Clipboard.set(it, false)
+                Toast.makeText(this, "${it.size} copied — open a folder and Paste", Toast.LENGTH_SHORT).show()
+                exitSelection()
+            }
+        }
+        binding.selDeleteBtn.setOnClickListener {
+            selList()?.let { FileOps.deleteMultiple(this, it) { exitSelection(); refresh() } }
+        }
+        binding.selAllBtn.setOnClickListener { selAdapter?.selectAllVisible() }
+        binding.analyzerBtn.setOnClickListener { v -> tap(v) { startActivity(Intent(this, StorageAnalyzerActivity::class.java)) } }
+
         binding.bottomNav.setOnItemSelectedListener { item ->
+            if (selAdapter != null) exitSelection()
             currentTab = item.itemId
             applyTabVisibility()
             true
@@ -157,6 +180,33 @@ class MainActivity : AppCompatActivity() {
         val onStorage = currentTab == R.id.nav_home
         binding.filterButton.visibility = if (onStorage) View.VISIBLE else View.GONE
         binding.secureButton.visibility = if (onStorage) View.VISIBLE else View.GONE
+    }
+
+    // ---- Multi-select on Home / Recent lists ----
+    private fun selList(): List<File>? = selAdapter?.selectedList()?.takeIf { it.isNotEmpty() }
+
+    private fun enterSelection(adapter: FileAdapter) {
+        selAdapter = adapter
+        binding.headerIcons.visibility = View.GONE
+        binding.bigTitle.visibility = View.GONE
+        binding.selectionBar.visibility = View.VISIBLE
+    }
+
+    private fun onSelectionCount(count: Int) {
+        if (count == 0) { exitSelection(); return }
+        binding.selCount.text = "$count selected"
+    }
+
+    private fun exitSelection() {
+        selAdapter?.exitSelection()
+        selAdapter = null
+        binding.selectionBar.visibility = View.GONE
+        binding.headerIcons.visibility = View.VISIBLE
+        binding.bigTitle.visibility = View.VISIBLE
+    }
+
+    override fun onBackPressed() {
+        if (selAdapter != null) exitSelection() else super.onBackPressed()
     }
 
     private fun browse(path: String) {

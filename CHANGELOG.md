@@ -3,6 +3,13 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [4.6] — 2026-07-20 (versionCode 37)
+### Changed
+- **Video player UI** rebuilt to the Files-by-Google layout: a **full-width seek bar** with times at the ends (+ a rotate/orientation button), and a **centered bottom transport row** — rewind 10s · previous · play/pause · next · forward 10s. Mute and Share moved into the top bar. The on-screen 10-second skip buttons are back (double-tap L/R still seeks too).
+### Added
+- **Multi-select on the Storage and Recent lists.** Long-press to select; a contextual header bar shows the count with **Share · Delete · Copy · Select-all** (Back / ✕ exits).
+- **Storage analyzer** (Recent tab): device **used / total / free** plus a size **breakdown by type** (Images, Videos, Audio, Documents, Archives, Apps, and Other & system) with per-type bars.
+
 ## [4.5] — 2026-07-20 (versionCode 36)
 ### Changed
 - **Share is now a first, always-visible button** on the multi-select top bar (Category and Browse screens), instead of sometimes collapsing into the ⋮ overflow. Order is Share · Delete · Copy, with the rest in overflow.

@@ -127,6 +127,8 @@ class PlayerActivity : AppCompatActivity(), VideoService.Listener {
         binding.btnBack.setOnClickListener { finish() }
         binding.btnShare.setOnClickListener { Anim.bounce(it); shareCurrent() }
         binding.btnPlayPause.setOnClickListener { Anim.bounce(it); service?.toggle() }
+        binding.btnRewind.setOnClickListener { Anim.bounce(it); seekRelative(-10_000) }
+        binding.btnForward.setOnClickListener { Anim.bounce(it); seekRelative(10_000) }
         binding.btnPrev.setOnClickListener { Anim.bounce(it); service?.prev() }
         binding.btnNext.setOnClickListener { Anim.bounce(it); service?.next() }
         binding.btnAspect.setOnClickListener { cycleAspect() }
