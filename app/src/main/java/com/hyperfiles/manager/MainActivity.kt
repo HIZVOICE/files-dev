@@ -101,6 +101,8 @@ class MainActivity : AppCompatActivity() {
         binding.moreCategoriesBtn.setOnClickListener { v -> Anim.bounce(v); toggleCategories() }
         binding.cleanCacheBtn.setOnClickListener { v -> Anim.bounce(v); cleanCache() }
         binding.findDupBtn.setOnClickListener { v -> tap(v) { startActivity(Intent(this, DuplicatesActivity::class.java)) } }
+        binding.recycleBinBtn.setOnClickListener { v -> tap(v) { startActivity(Intent(this, RecycleBinActivity::class.java)) } }
+        binding.secureButton.setOnClickListener { v -> tap(v) { startActivity(Intent(this, SecureFolderActivity::class.java)) } }
 
         binding.bottomNav.setOnItemSelectedListener { item ->
             currentTab = item.itemId
@@ -151,9 +153,10 @@ class MainActivity : AppCompatActivity() {
             R.id.nav_devs -> "Devs"
             else -> "Storage"
         }
-        // Sort / new-folder only apply to the Storage file list.
+        // Sort / secure-folder only apply to the Storage tab.
         val onStorage = currentTab == R.id.nav_home
         binding.filterButton.visibility = if (onStorage) View.VISIBLE else View.GONE
+        binding.secureButton.visibility = if (onStorage) View.VISIBLE else View.GONE
     }
 
     private fun browse(path: String) {

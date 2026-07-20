@@ -3,6 +3,12 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [4.3] — 2026-07-20 (versionCode 34)
+### Changed
+- **Recent tab** now has a **Recycle bin** shortcut alongside Cache and Duplicates.
+- **Storage tab** gained a **Secure folder** (lock) button in the top header (shown on the Storage tab only).
+- **Video player controls** moved down onto the seek-bar row so they no longer cover the video: `prev · play/pause · [rounded seek] · next` in a single bottom row (the seek bar is a thicker rounded pill between play/pause and next). The center overlay pill was removed.
+
 ## [4.2] — 2026-07-20 (versionCode 33)
 ### Fixed
 - **Status-bar overlap on tall / newer devices (e.g. Pixel 6 Pro).** Under targetSdk 36 edge-to-edge is force-enabled (the opt-out flag is ignored), so headers/toolbars drew under the status bar and the top menu couldn't be tapped. Every screen now pads its content by the system-bar insets (and the video player insets its overlaid top/bottom control bars); the fullscreen video surface itself stays edge-to-edge. When the platform isn't edge-to-edge the insets are 0, so there's no double padding.
