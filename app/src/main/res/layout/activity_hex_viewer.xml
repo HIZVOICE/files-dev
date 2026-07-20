@@ -4,17 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?android:attr/colorBackground">
+    android:background="@color/reader_bg">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorSurface"
+        android:layout_margin="8dp"
+        android:background="@drawable/bg_glass_bar"
         app:navigationIcon="@drawable/ic_back"
-        app:navigationIconTint="@color/text_primary"
-        app:titleTextColor="@color/text_primary"
-        app:subtitleTextColor="@color/text_secondary"
+        app:navigationIconTint="@color/white"
+        app:titleTextColor="@color/white"
+        app:subtitleTextColor="#B3FFFFFF"
         app:titleTextAppearance="@style/ToolbarTitle" />
 
     <LinearLayout
@@ -23,9 +24,9 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_margin="12dp"
-        android:padding="12dp"
-        android:background="@drawable/bg_banner"
+        android:layout_marginHorizontal="12dp"
+        android:padding="14dp"
+        android:background="@drawable/bg_glass_panel"
         android:visibility="gone">
 
         <TextView
@@ -34,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Detected"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/white"
             android:textSize="14sp" />
 
         <com.google.android.material.button.MaterialButton
@@ -48,8 +49,11 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/hex_bg">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_margin="12dp"
+        android:background="@drawable/bg_glass_panel"
+        android:scrollbarStyle="outsideOverlay">
 
         <HorizontalScrollView
             android:layout_width="match_parent"
@@ -59,7 +63,7 @@
                 android:id="@+id/hexContent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="12dp"
+                android:padding="16dp"
                 android:fontFamily="monospace"
                 android:textColor="@color/hex_text"
                 android:textSize="12sp"

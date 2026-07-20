@@ -28,22 +28,21 @@ object ArchiveBridge {
         }.start()
     }
 
+    /** Extract in the background; progress shows in the floating pill + notification. */
     fun extract(activity: Activity, archive: File, destParent: File, onChanged: () -> Unit) {
         if (!ArchiveEngine.isSupported(archive)) { toast(activity, "Unsupported archive format"); return }
-        val dialog = progress(activity, "Extracting…")
-        LiveNotify.start(activity, 4202, "Extracting ${archive.name}")
-        Thread {
-            val result = runCatching {
-                val src = Readable.resolve(archive) ?: throw IllegalStateException(Readable.reason())
-                val target = ArchiveEngine.writableExtractDir(destParent, ArchiveEngine.baseName(archive))
-                ArchiveEngine.extractAll(src, target); target
+        if (ExtractionManager.isRunning) { toast(activity, "Already extracting — please wait"); return }
+        ProgressPill.attach(activity)
+        // Refresh the browser once the background extraction succeeds.
+        lateinit var l: (ExtractionManager.State?) -> Unit
+        l = { s ->
+            if (s != null && s.status != ExtractionManager.Status.RUNNING) {
+                if (s.status == ExtractionManager.Status.DONE) activity.runOnUiThread { onChanged() }
+                ExtractionManager.removeListener(l)
             }
-            activity.runOnUiThread {
-                LiveNotify.finish(activity, 4202); dialog.dismiss()
-                result.onSuccess { FileScanner.invalidate(); onChanged(); toast(activity, "Extracted to ${it.absolutePath}") }
-                    .onFailure { toast(activity, "Extract failed: ${it.message ?: it.javaClass.simpleName}") }
-            }
-        }.start()
+        }
+        ExtractionManager.start(activity, archive, destParent)
+        ExtractionManager.addListener(l)
     }
 
     fun compress7z(activity: Activity, files: List<File>, onChanged: () -> Unit) {

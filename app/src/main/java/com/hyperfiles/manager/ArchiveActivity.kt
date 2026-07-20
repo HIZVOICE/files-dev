@@ -25,6 +25,7 @@ class ArchiveActivity : AppCompatActivity() {
         Theming.applyActivityTheme(this)
         binding = ActivityArchiveBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        ProgressPill.attach(this)
         setSupportActionBar(binding.toolbar)
         binding.toolbar.setNavigationOnClickListener { finish() }
 
@@ -77,27 +78,8 @@ class ArchiveActivity : AppCompatActivity() {
     }
 
     private fun extractAll() {
-        binding.progress.visibility = View.VISIBLE
-        lifecycleScope.launch {
-            val src = readable()
-            if (src == null) {
-                binding.progress.visibility = View.GONE
-                Toast.makeText(this@ArchiveActivity, Readable.reason(), Toast.LENGTH_LONG).show()
-                return@launch
-            }
-            val dest = ArchiveEngine.writableExtractDir(archive.parentFile ?: filesDir, ArchiveEngine.baseName(archive))
-            val result = withContext(Dispatchers.IO) { runCatching { ArchiveEngine.extractAll(src, dest); dest } }
-            binding.progress.visibility = View.GONE
-            result.onSuccess {
-                FileScanner.invalidate()
-                Toast.makeText(this@ArchiveActivity, "Extracted to ${it.absolutePath}", Toast.LENGTH_LONG).show()
-                startActivity(Intent(this@ArchiveActivity, BrowseActivity::class.java)
-                    .putExtra(OpenHelper.EXTRA_PATH, it.absolutePath))
-            }.onFailure { e ->
-                Toast.makeText(this@ArchiveActivity,
-                    "Extraction failed: ${e.message ?: e.javaClass.simpleName}", Toast.LENGTH_LONG).show()
-            }
-        }
+        // Runs in the background (survives leaving this screen); progress shows in the pill + notification.
+        ExtractionManager.start(this, archive, archive.parentFile ?: filesDir)
     }
 
     private fun previewEntry(entry: ArchiveEngine.Entry) {

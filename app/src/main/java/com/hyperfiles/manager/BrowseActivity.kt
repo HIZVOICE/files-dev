@@ -45,6 +45,7 @@ class BrowseActivity : AppCompatActivity() {
         Theming.applyActivityTheme(this)
         binding = ActivityBrowseBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        ProgressPill.attach(this)
 
         val path = intent.getStringExtra(OpenHelper.EXTRA_PATH) ?: StorageUtil.primaryStorage().absolutePath
         openSearch = intent.getBooleanExtra(EXTRA_SEARCH, false)

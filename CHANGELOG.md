@@ -3,6 +3,12 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [5.6] — 2026-07-20 (versionCode 47)
+### Added
+- **Background extraction with an overall progress pill.** Archive extraction ("Extract all" and context-menu "Extract here") now runs in the **background** — it keeps going if you leave the archive screen — and shows a floating **glass pill with the overall percentage** (plus an ongoing status-bar notification). ZIP / 7z / RAR report an accurate byte-based percent; streamed formats (tar, cpio, …) show an indeterminate bar. The pill follows you across the Home, browser and archive screens and clears itself when done (✓) or on failure (with the reason).
+### Changed
+- **Doc, text and hex viewers redesigned in the glassmorphism language.** All three now use a cohesive dark "glass reader" surface with a floating frosted toolbar and frosted content cards: the **hex** viewer keeps its green-on-dark dump inside a frosted panel (with a frosted detection banner), the **text** viewer is a frosted editor with light monospace text, and the **document** viewer shows PDF pages / extracted text / web content on the same dark glass. No blocking "Extracting…" dialog anymore.
+
 ## [5.5] — 2026-07-20 (versionCode 46)
 ### Changed
 - **Media players redesigned from scratch in a glassmorphism ("Materials") language** — frosted translucent panels, specular white edge strokes, rounded corners and white/vibrancy text, matching the reference mockups.

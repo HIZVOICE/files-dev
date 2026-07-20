@@ -15,4 +15,8 @@
     <color name="hex_bg">#FF0E1116</color>
     <color name="hex_text">#FFB6F0C0</color>
     <color name="select_highlight">#243482FF</color>
+
+    <!-- Dark "glass reader" surface for the doc / text / hex viewers -->
+    <color name="reader_bg">#FF0F1116</color>
+    <color name="reader_text">#FFE7EAF0</color>
 </resources>

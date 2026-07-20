@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/extract_pill"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_pill"
+    android:paddingHorizontal="18dp"
+    android:paddingVertical="12dp"
+    android:elevation="10dp"
+    android:visibility="gone">
+
+    <TextView
+        android:id="@+id/pillText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Extracting…"
+        android:textColor="@color/white"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <ProgressBar
+        android:id="@+id/pillBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="248dp"
+        android:layout_height="4dp"
+        android:layout_marginTop="10dp"
+        android:max="100"
+        android:progress="0"
+        android:progressTint="@color/hyper_blue"
+        android:progressBackgroundTint="#33FFFFFF" />
+</LinearLayout>

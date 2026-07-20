@@ -65,6 +65,7 @@ class MainActivity : AppCompatActivity() {
         Theming.applyActivityTheme(this)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        ProgressPill.attach(this)
 
         binding.categoryGrid.layoutManager = GridLayoutManager(this, 2)
         binding.categoryGrid.isNestedScrollingEnabled = false

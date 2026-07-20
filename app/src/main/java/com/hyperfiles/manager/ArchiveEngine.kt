@@ -20,6 +20,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * 7-Zip-class archive listing / extraction / creation.
@@ -131,14 +132,39 @@ object ArchiveEngine {
         else -> streamList(file)
     }
 
-    fun extractAll(file: File, destDir: File) {
+    /**
+     * Extract everything to [destDir]. [onProgress] reports overall percent 0..100,
+     * or -1 for an indeterminate phase (formats whose total size isn't known upfront).
+     */
+    fun extractAll(file: File, destDir: File, onProgress: (Int) -> Unit = {}) {
         destDir.mkdirs()
         when {
-            isSevenZ(file) -> sevenZExtract(file, destDir)
-            isRar(file) -> rarExtract(file, destDir)
-            isZipContainer(file) -> zipExtract(file, destDir)
-            else -> streamExtract(file, destDir)
+            isSevenZ(file) -> sevenZExtract(file, destDir, onProgress)
+            isRar(file) -> rarExtract(file, destDir, onProgress)
+            isZipContainer(file) -> zipExtract(file, destDir, onProgress)
+            else -> streamExtract(file, destDir, onProgress)
         }
+        onProgress(100)
+    }
+
+    /** Accumulates written bytes and reports whole-percent changes. */
+    private class Sink(private val total: Long, private val cb: (Int) -> Unit) {
+        private var done = 0L
+        private var last = -1
+        fun add(n: Int) {
+            if (total <= 0 || n <= 0) return
+            done += n
+            val p = ((done * 100) / total).toInt().coerceIn(0, 100)
+            if (p != last) { last = p; cb(p) }
+        }
+    }
+
+    /** OutputStream that reports bytes to a Sink (for libraries that write internally, e.g. junrar). */
+    private class CountingOut(private val out: OutputStream, private val sink: Sink) : OutputStream() {
+        override fun write(b: Int) { out.write(b); sink.add(1) }
+        override fun write(b: ByteArray, off: Int, len: Int) { out.write(b, off, len); sink.add(len) }
+        override fun flush() = out.flush()
+        override fun close() = out.close()
     }
 
     fun extractEntry(file: File, entryName: String, outFile: File): Boolean {
@@ -187,14 +213,29 @@ object ArchiveEngine {
     }
 
     @Suppress("DEPRECATION")
-    private fun zipExtract(file: File, destDir: File) {
+    private fun zipExtract(file: File, destDir: File, onProgress: (Int) -> Unit) {
         ApacheZipFile(file).use { zf ->
+            var total = 0L
+            run {
+                val en = zf.entries
+                while (en.hasMoreElements()) { val z = en.nextElement(); if (!z.isDirectory && z.size > 0) total += z.size }
+            }
+            if (total <= 0) onProgress(-1)
+            val sink = Sink(total, onProgress)
+            val buf = ByteArray(1 shl 16)
             val en = zf.entries
             while (en.hasMoreElements()) {
                 val z = en.nextElement()
                 val outFile = safeChild(destDir, z.name)
                 if (z.isDirectory) outFile.mkdirs()
-                else if (zf.canReadEntryData(z)) zf.getInputStream(z).use { copy(it, outFile) }
+                else if (zf.canReadEntryData(z)) {
+                    outFile.parentFile?.mkdirs()
+                    zf.getInputStream(z).use { ins ->
+                        FileOutputStream(outFile).use { fos ->
+                            while (true) { val r = ins.read(buf); if (r < 0) break; fos.write(buf, 0, r); sink.add(r) }
+                        }
+                    }
+                }
             }
         }
     }
@@ -221,7 +262,17 @@ object ArchiveEngine {
     }
 
     @Suppress("DEPRECATION")
-    private fun sevenZExtract(file: File, destDir: File) {
+    private fun sevenZTotal(file: File): Long {
+        var t = 0L
+        SevenZFile(file).use { sz -> for (e in sz.entries) if (!e.isDirectory && e.size > 0) t += e.size }
+        return t
+    }
+
+    @Suppress("DEPRECATION")
+    private fun sevenZExtract(file: File, destDir: File, onProgress: (Int) -> Unit) {
+        val total = runCatching { sevenZTotal(file) }.getOrDefault(0L)
+        if (total <= 0) onProgress(-1)
+        val sink = Sink(total, onProgress)
         SevenZFile(file).use { sz ->
             var e = sz.nextEntry
             val buf = ByteArray(1 shl 16)
@@ -231,7 +282,7 @@ object ArchiveEngine {
                 else {
                     outFile.parentFile?.mkdirs()
                     FileOutputStream(outFile).use { fos ->
-                        while (true) { val r = sz.read(buf); if (r < 0) break; fos.write(buf, 0, r) }
+                        while (true) { val r = sz.read(buf); if (r < 0) break; fos.write(buf, 0, r); sink.add(r) }
                     }
                 }
                 e = sz.nextEntry
@@ -267,12 +318,16 @@ object ArchiveEngine {
         return out
     }
 
-    private fun rarExtract(file: File, destDir: File) {
+    private fun rarExtract(file: File, destDir: File, onProgress: (Int) -> Unit) {
         RarArchive(file).use { a ->
+            var total = 0L
+            for (h in a.fileHeaders) if (!h.isDirectory) total += h.fullUnpackSize
+            if (total <= 0) onProgress(-1)
+            val sink = Sink(total, onProgress)
             for (h in a.fileHeaders) {
                 val outFile = safeChild(destDir, rarName(h))
                 if (h.isDirectory) outFile.mkdirs()
-                else { outFile.parentFile?.mkdirs(); FileOutputStream(outFile).use { a.extractFile(h, it) } }
+                else { outFile.parentFile?.mkdirs(); FileOutputStream(outFile).use { a.extractFile(h, CountingOut(it, sink)) } }
             }
         }
     }
@@ -333,7 +388,8 @@ object ArchiveEngine {
         return if (c != null) { runCatching { c.close() }; listOf(Entry(strippedName(file), -1, false)) } else emptyList()
     }
 
-    private fun streamExtract(file: File, destDir: File) {
+    private fun streamExtract(file: File, destDir: File, onProgress: (Int) -> Unit) {
+        onProgress(-1)   // total isn't known upfront for streamed archives → indeterminate
         val ais = openArchive(file)
         if (ais != null) {
             ais.use {

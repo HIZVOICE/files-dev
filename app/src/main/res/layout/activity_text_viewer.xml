@@ -4,28 +4,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?android:attr/colorBackground">
+    android:background="@color/reader_bg">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorSurface"
+        android:layout_margin="8dp"
+        android:background="@drawable/bg_glass_bar"
         app:navigationIcon="@drawable/ic_back"
-        app:navigationIconTint="@color/text_primary"
-        app:titleTextColor="@color/text_primary"
-        app:subtitleTextColor="@color/text_secondary"
+        app:navigationIconTint="@color/white"
+        app:titleTextColor="@color/white"
+        app:subtitleTextColor="#B3FFFFFF"
         app:titleTextAppearance="@style/ToolbarTitle" />
 
     <EditText
         android:id="@+id/textContent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_margin="12dp"
         android:padding="16dp"
         android:gravity="top|start"
-        android:background="@android:color/transparent"
+        android:background="@drawable/bg_glass_panel"
         android:fontFamily="monospace"
-        android:textColor="@color/text_primary"
+        android:textColor="@color/reader_text"
+        android:textColorHighlight="#553482FF"
         android:textSize="13sp"
         android:inputType="textMultiLine"
         android:scrollbars="vertical"
