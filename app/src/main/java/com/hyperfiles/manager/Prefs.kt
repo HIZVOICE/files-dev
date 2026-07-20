@@ -8,7 +8,7 @@ object Prefs {
     fun showDevTools(c: Context): Boolean = p(c).getBoolean("show_dev_tools", true)
     fun setShowDevTools(c: Context, v: Boolean) = p(c).edit().putBoolean("show_dev_tools", v).apply()
 
-    // "system" | "light" | "dark" | "amoled"
+    // "system" | "light" | "dark" | "amoled" | "glass"
     fun themeMode(c: Context): String = p(c).getString("theme_mode", "system") ?: "system"
     fun setThemeMode(c: Context, v: String) = p(c).edit().putString("theme_mode", v).apply()
 

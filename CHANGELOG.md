@@ -3,6 +3,12 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [5.2] — 2026-07-20 (versionCode 43)
+### Added
+- **New "Glass (iOS Materials)" theme** — an Apple-style ultra-thin-material look: a vibrant abstract gradient backdrop (deep blue → purple → soft pink), translucent frosted surfaces with a ~15%-white specular edge stroke, pure-white primary text with a 65%-opacity secondary tier for iOS-style vibrancy, and soft diffused shadows on 20–24px continuous-radius panels. Selectable in **Settings → Theme** and applied across every migrated Compose screen (Settings, Recycle bin, System info, APK info).
+### Notes
+- XML View screens fall back to the dark palette when Glass is selected (they'll adopt the frosted look as they migrate). The full frosted-card treatment from the design mockup — storage-summary widget with circular ring and the 2×2 frosted folder grid — lands with the Home / Category screens.
+
 ## [5.1] — 2026-07-20 (versionCode 42)
 ### Changed
 - **Recycle bin, System info, and APK info rebuilt in Jetpack Compose + Material 3** — continuing the screen-by-screen migration begun with Settings in 5.0. Recycle bin is now a Compose `LazyColumn` with a per-item dropdown (Restore · Open · Delete forever) and an Empty-bin confirm dialog; System info and APK info are Compose scaffolds (monospaced detail, copy / install actions, APK icon rendered via Compose `Image`).

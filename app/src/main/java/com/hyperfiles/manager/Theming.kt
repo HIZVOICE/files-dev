@@ -10,7 +10,7 @@ object Theming {
         AppCompatDelegate.setDefaultNightMode(
             when (Prefs.themeMode(ctx)) {
                 "light" -> AppCompatDelegate.MODE_NIGHT_NO
-                "dark", "amoled" -> AppCompatDelegate.MODE_NIGHT_YES
+                "dark", "amoled", "glass" -> AppCompatDelegate.MODE_NIGHT_YES
                 else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             }
         )

@@ -55,8 +55,8 @@ import com.hyperfiles.manager.ui.FilesDevTheme
 /** First screen migrated to Jetpack Compose + Material 3 (rest of the app remains on Views). */
 class SettingsActivity : AppCompatActivity() {
 
-    private val themeKeys = listOf("system", "light", "dark", "amoled")
-    private val themeLabels = listOf("System default", "Light", "Dark", "AMOLED (pure black)")
+    private val themeKeys = listOf("system", "light", "dark", "amoled", "glass")
+    private val themeLabels = listOf("System default", "Light", "Dark", "AMOLED (pure black)", "Glass (iOS Materials)")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

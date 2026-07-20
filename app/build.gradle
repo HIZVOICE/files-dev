@@ -13,8 +13,8 @@ android {
         applicationId "com.hyperfiles.manager"
         minSdk 24
         targetSdk 36
-        versionCode 42
-        versionName "5.1"
+        versionCode 43
+        versionName "5.2"
     }
 
     splits {
