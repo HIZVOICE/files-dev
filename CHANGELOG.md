@@ -3,6 +3,10 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [4.5] — 2026-07-20 (versionCode 36)
+### Changed
+- **Share is now a first, always-visible button** on the multi-select top bar (Category and Browse screens), instead of sometimes collapsing into the ⋮ overflow. Order is Share · Delete · Copy, with the rest in overflow.
+
 ## [4.4] — 2026-07-20 (versionCode 35)
 ### Fixed
 - **Secure folder opened without asking for a password** from the Storage-tab shortcut — it launched the folder directly, bypassing the lock. It now goes through the lock screen (PIN / pattern / fingerprint), same as the Settings entry.

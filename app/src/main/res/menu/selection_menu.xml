@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/sel_copy" android:title="Copy" android:icon="@drawable/ic_copy" app:showAsAction="ifRoom" />
+    <item android:id="@+id/sel_share" android:title="Share" android:icon="@drawable/ic_share" app:showAsAction="always" />
     <item android:id="@+id/sel_delete" android:title="Delete" android:icon="@drawable/ic_delete" app:showAsAction="ifRoom" />
-    <item android:id="@+id/sel_share" android:title="Share" android:icon="@drawable/ic_share" app:showAsAction="ifRoom" />
+    <item android:id="@+id/sel_copy" android:title="Copy" android:icon="@drawable/ic_copy" app:showAsAction="ifRoom" />
     <item android:id="@+id/sel_move" android:title="Move" app:showAsAction="never" />
     <item android:id="@+id/sel_compress_zip" android:title="Compress to ZIP" app:showAsAction="never" />
     <item android:id="@+id/sel_compress_7z" android:title="Compress to 7z" app:showAsAction="never" />
