@@ -3,6 +3,11 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [4.2] — 2026-07-20 (versionCode 33)
+### Fixed
+- **Status-bar overlap on tall / newer devices (e.g. Pixel 6 Pro).** Under targetSdk 36 edge-to-edge is force-enabled (the opt-out flag is ignored), so headers/toolbars drew under the status bar and the top menu couldn't be tapped. Every screen now pads its content by the system-bar insets (and the video player insets its overlaid top/bottom control bars); the fullscreen video surface itself stays edge-to-edge. When the platform isn't edge-to-edge the insets are 0, so there's no double padding.
+- **Permission on Android 10 and older.** `hasAllFilesAccess()` always returned true on pre-Android-11 devices, so the app never requested `READ_EXTERNAL_STORAGE` — it couldn't list files and the category shortcuts came up empty. It now checks/requests the real runtime permission on API ≤29.
+
 ## [4.1] — 2026-07-20 (versionCode 32)
 ### Added
 - **Swipe down to dismiss** the photo, video and audio players. The photo viewer follows the finger and fades the background (release past a threshold to close, otherwise it snaps back); the audio player closes on a downward swipe over the album art; the video player closes on a fast, near-vertical downward flick (tuned to stay distinct from the brightness/volume drags).

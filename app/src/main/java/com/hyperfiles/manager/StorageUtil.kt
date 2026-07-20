@@ -20,8 +20,16 @@ object StorageUtil {
     fun downloadsDir(): File =
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 
-    fun hasAllFilesAccess(): Boolean =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Environment.isExternalStorageManager() else true
+    /**
+     * On Android 11+ this is the "All files access" (MANAGE_EXTERNAL_STORAGE) grant.
+     * On Android 10 and below there is no such thing — we must actually hold the
+     * READ_EXTERNAL_STORAGE runtime permission, so check it (returning `true`
+     * unconditionally previously meant the app never requested it and couldn't read files).
+     */
+    fun hasAllFilesAccess(context: Context): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Environment.isExternalStorageManager()
+        else context.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
 
     fun formatSize(bytes: Long): String {
         if (bytes <= 0) return "0 B"

@@ -116,7 +116,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refresh() {
-        val access = StorageUtil.hasAllFilesAccess()
+        val access = StorageUtil.hasAllFilesAccess(this)
         binding.permissionCard.visibility = if (access) View.GONE else View.VISIBLE
         binding.headerBar.visibility = if (access) View.VISIBLE else View.GONE
         binding.bottomNav.visibility = if (access) View.VISIBLE else View.GONE

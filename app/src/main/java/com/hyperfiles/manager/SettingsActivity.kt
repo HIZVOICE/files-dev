@@ -83,7 +83,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun updateStatuses() {
-        val files = StorageUtil.hasAllFilesAccess()
+        val files = StorageUtil.hasAllFilesAccess(this)
         binding.permAllFilesStatus.text = if (files) "Granted" else "Not granted"
         binding.permAllFilesBtn.isEnabled = !files
 

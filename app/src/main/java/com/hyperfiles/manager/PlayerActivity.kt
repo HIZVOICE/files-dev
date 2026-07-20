@@ -18,9 +18,11 @@ import android.widget.SeekBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updatePadding
 import com.hyperfiles.manager.databinding.ActivityPlayerBinding
 import java.io.File
 import kotlin.math.abs
@@ -86,6 +88,18 @@ class PlayerActivity : AppCompatActivity(), VideoService.Listener {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Keep the overlaid control bars clear of the status/navigation bars (this screen
+        // is intentionally edge-to-edge, so it's excluded from the global inset padding).
+        val pad = (10 * resources.displayMetrics.density).toInt()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.topBar) { v, insets ->
+            v.updatePadding(top = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top + pad)
+            insets
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomBar) { v, insets ->
+            v.updatePadding(bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom + pad)
+            insets
+        }
 
         val file = IntentInput.resolveToFile(this, intent)
         if (file == null) { finish(); return }
