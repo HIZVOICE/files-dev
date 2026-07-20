@@ -3,6 +3,14 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [5.3] — 2026-07-20 (versionCode 44)
+### Fixed
+- **ZIP / archive handling that "didn't work" for restricted locations.** Archive listing, extraction and the ROM-payload (`payload.bin`) parser used plain `java.io`, so anything in **Android/data**, **Android/obb** or a **root-only path** (`/data`, `/system`, …) failed silently — exactly the places this app exists to reach. All of them now resolve the file through the **elevated (Shizuku/root) backend** first (copy-out to a shared temp dir when it isn't directly readable).
+- **Extraction now always lands somewhere writable.** If the archive's own folder isn't writable, files extract to **Download/FilesDev** instead of failing. The success toast shows the exact destination path.
+- **Real error messages.** Archive/payload failures previously showed a generic "empty" / "failed" with no reason; they now surface the actual cause (e.g. "restricted location — grant Shizuku/root", or the underlying exception), so problems are diagnosable instead of mysterious.
+### Added
+- **Content-based archive detection.** `detectFormat` now falls back to **magic-byte sniffing** (7z, ZIP, gzip, bzip2, xz, tar) so extensionless or misnamed archives still open.
+
 ## [5.2] — 2026-07-20 (versionCode 43)
 ### Added
 - **New "Glass (iOS Materials)" theme** — an Apple-style ultra-thin-material look: a vibrant abstract gradient backdrop (deep blue → purple → soft pink), translucent frosted surfaces with a ~15%-white specular edge stroke, pure-white primary text with a 65%-opacity secondary tier for iOS-style vibrancy, and soft diffused shadows on 20–24px continuous-radius panels. Selectable in **Settings → Theme** and applied across every migrated Compose screen (Settings, Recycle bin, System info, APK info).

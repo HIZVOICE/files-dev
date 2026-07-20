@@ -23,8 +23,14 @@ object ArchiveEngine {
 
     enum class Format { SEVENZ, ZIP, TAR, TAR_GZ, TAR_BZ2, TAR_XZ, GZ, BZ2, XZ, UNKNOWN }
 
+    /** Extension first (handles the compound tar.* names); magic-byte sniff as a fallback. */
     fun detectFormat(file: File): Format {
-        val n = file.name.lowercase()
+        val byExt = detectByExtension(file.name)
+        return if (byExt != Format.UNKNOWN) byExt else detectByMagic(file)
+    }
+
+    private fun detectByExtension(rawName: String): Format {
+        val n = rawName.lowercase()
         return when {
             n.endsWith(".7z") -> Format.SEVENZ
             n.endsWith(".zip") || n.endsWith(".jar") -> Format.ZIP
@@ -39,7 +45,65 @@ object ArchiveEngine {
         }
     }
 
+    /** Sniff the header so an extensionless / misnamed archive still opens. */
+    private fun detectByMagic(file: File): Format = try {
+        val h = ByteArray(512)
+        val read = FileInputStream(file).use { ins ->
+            var t = 0
+            while (t < h.size) { val r = ins.read(h, t, h.size - t); if (r < 0) break; t += r }
+            t
+        }
+        fun at(off: Int, vararg b: Int): Boolean {
+            if (read < off + b.size) return false
+            for (i in b.indices) if ((h[off + i].toInt() and 0xFF) != b[i]) return false
+            return true
+        }
+        when {
+            at(0, 0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C) -> Format.SEVENZ
+            at(0, 0x50, 0x4B, 0x03, 0x04) || at(0, 0x50, 0x4B, 0x05, 0x06) ||
+                at(0, 0x50, 0x4B, 0x07, 0x08) -> Format.ZIP
+            at(0, 0x1F, 0x8B) -> Format.GZ
+            at(0, 0x42, 0x5A, 0x68) -> Format.BZ2
+            at(0, 0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00) -> Format.XZ
+            at(257, 0x75, 0x73, 0x74, 0x61, 0x72) -> Format.TAR   // "ustar"
+            else -> Format.UNKNOWN
+        }
+    } catch (e: Exception) { Format.UNKNOWN }
+
     fun isSupported(file: File) = detectFormat(file) != Format.UNKNOWN
+
+    // ---- Output location helpers ---------------------------------------
+
+    /** Strip archive extension(s) for a default output-folder name. */
+    fun baseName(f: File): String {
+        val n = f.name
+        val lower = n.lowercase()
+        for (s in listOf(".tar.gz", ".tar.bz2", ".tar.xz", ".tgz", ".tbz2", ".tbz", ".txz"))
+            if (lower.endsWith(s)) return n.substring(0, n.length - s.length)
+        val i = n.lastIndexOf('.')
+        return if (i > 0) n.substring(0, i) else n
+    }
+
+    private fun canWriteInto(dir: File): Boolean = try {
+        dir.isDirectory && dir.canWrite() && !SafHelper.isRestricted(dir)
+    } catch (_: Exception) { false }
+
+    private fun uniqueDir(parent: File, name: String): File {
+        var f = File(parent, name); var i = 1
+        while (f.exists()) { f = File(parent, "$name ($i)"); i++ }
+        return f
+    }
+
+    /**
+     * A writable directory to extract into: the archive's own folder when it's
+     * writable, otherwise Download/FilesDev on the primary volume (always
+     * writable with all-files access, and never a restricted Android/data path).
+     */
+    fun writableExtractDir(preferredParent: File, baseName: String): File {
+        val parent = if (canWriteInto(preferredParent)) preferredParent
+        else File(StorageUtil.primaryStorage(), "Download/FilesDev").apply { mkdirs() }
+        return uniqueDir(parent, baseName)
+    }
 
     private fun strippedName(file: File): String {
         val n = file.name

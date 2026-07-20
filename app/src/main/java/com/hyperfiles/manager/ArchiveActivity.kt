@@ -1,5 +1,6 @@
 package com.hyperfiles.manager
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -16,7 +17,8 @@ class ArchiveActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityArchiveBinding
     private lateinit var adapter: ArchiveEntryAdapter
-    private lateinit var archive: File
+    private lateinit var archive: File     // original (may live in a restricted path)
+    private var readable: File? = null     // directly-readable original or elevated copy
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,42 +42,60 @@ class ArchiveActivity : AppCompatActivity() {
         loadEntries()
     }
 
+    /** Resolve (and cache) a directly-readable copy; handles Android/data via Shizuku/root. */
+    private suspend fun readable(): File? {
+        readable?.let { return it }
+        return withContext(Dispatchers.IO) { Readable.resolve(archive) }.also { readable = it }
+    }
+
     private fun loadEntries() {
         binding.progress.visibility = View.VISIBLE
         binding.empty.visibility = View.GONE
         lifecycleScope.launch {
-            val entries = withContext(Dispatchers.IO) {
-                try { ArchiveEngine.list(archive) } catch (e: Exception) { null }
-            }
-            binding.progress.visibility = View.GONE
-            if (entries == null) {
-                binding.empty.visibility = View.VISIBLE
+            val src = readable()
+            if (src == null) {
+                binding.progress.visibility = View.GONE
                 binding.summary.text = ""
-            } else {
+                binding.empty.text = Readable.reason()
+                binding.empty.visibility = View.VISIBLE
+                return@launch
+            }
+            val result = withContext(Dispatchers.IO) { runCatching { ArchiveEngine.list(src) } }
+            binding.progress.visibility = View.GONE
+            result.onSuccess { entries ->
                 adapter.submit(entries.sortedWith(compareByDescending<ArchiveEngine.Entry> { it.isDirectory }
                     .thenBy { it.name.lowercase() }))
                 binding.summary.text = "${entries.size} entries"
+                binding.empty.text = "This archive is empty"
                 binding.empty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
+            }.onFailure { e ->
+                binding.summary.text = ""
+                binding.empty.text = "Couldn't read this archive\n${e.message ?: e.javaClass.simpleName}"
+                binding.empty.visibility = View.VISIBLE
             }
         }
     }
 
     private fun extractAll() {
-        val destParent = archive.parentFile ?: filesDir
-        val dest = uniqueDir(destParent, baseName(archive))
         binding.progress.visibility = View.VISIBLE
         lifecycleScope.launch {
-            val ok = withContext(Dispatchers.IO) {
-                try { ArchiveEngine.extractAll(archive, dest); true } catch (e: Exception) { false }
+            val src = readable()
+            if (src == null) {
+                binding.progress.visibility = View.GONE
+                Toast.makeText(this@ArchiveActivity, Readable.reason(), Toast.LENGTH_LONG).show()
+                return@launch
             }
+            val dest = ArchiveEngine.writableExtractDir(archive.parentFile ?: filesDir, ArchiveEngine.baseName(archive))
+            val result = withContext(Dispatchers.IO) { runCatching { ArchiveEngine.extractAll(src, dest); dest } }
             binding.progress.visibility = View.GONE
-            if (ok) {
+            result.onSuccess {
                 FileScanner.invalidate()
-                Toast.makeText(this@ArchiveActivity, "Extracted to ${dest.name}", Toast.LENGTH_LONG).show()
-                startActivity(android.content.Intent(this@ArchiveActivity, BrowseActivity::class.java)
-                    .putExtra(OpenHelper.EXTRA_PATH, dest.absolutePath))
-            } else {
-                Toast.makeText(this@ArchiveActivity, "Extraction failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ArchiveActivity, "Extracted to ${it.absolutePath}", Toast.LENGTH_LONG).show()
+                startActivity(Intent(this@ArchiveActivity, BrowseActivity::class.java)
+                    .putExtra(OpenHelper.EXTRA_PATH, it.absolutePath))
+            }.onFailure { e ->
+                Toast.makeText(this@ArchiveActivity,
+                    "Extraction failed: ${e.message ?: e.javaClass.simpleName}", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -83,33 +103,17 @@ class ArchiveActivity : AppCompatActivity() {
     private fun previewEntry(entry: ArchiveEngine.Entry) {
         if (entry.isDirectory) return
         val base = entry.name.substringAfterLast('/').ifEmpty { "entry" }
-        val outDir = File(cacheDir, "archive_preview")
-        outDir.mkdirs()
+        val outDir = File(cacheDir, "archive_preview").apply { mkdirs() }
         val outFile = File(outDir, base)
         binding.progress.visibility = View.VISIBLE
         lifecycleScope.launch {
-            val ok = withContext(Dispatchers.IO) {
-                try { ArchiveEngine.extractEntry(archive, entry.name, outFile) } catch (e: Exception) { false }
+            val src = readable()
+            val ok = if (src == null) false else withContext(Dispatchers.IO) {
+                runCatching { ArchiveEngine.extractEntry(src, entry.name, outFile) }.getOrDefault(false)
             }
             binding.progress.visibility = View.GONE
             if (ok) OpenHelper.open(this@ArchiveActivity, outFile)
             else Toast.makeText(this@ArchiveActivity, "Could not open entry", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun baseName(f: File): String {
-        val n = f.name
-        val lower = n.lowercase()
-        for (s in listOf(".tar.gz", ".tar.bz2", ".tar.xz", ".tgz", ".tbz2", ".txz"))
-            if (lower.endsWith(s)) return n.substring(0, n.length - s.length)
-        val i = n.lastIndexOf('.')
-        return if (i > 0) n.substring(0, i) else n
-    }
-
-    private fun uniqueDir(parent: File, name: String): File {
-        var f = File(parent, name)
-        var i = 1
-        while (f.exists()) { f = File(parent, "$name ($i)"); i++ }
-        return f
     }
 }

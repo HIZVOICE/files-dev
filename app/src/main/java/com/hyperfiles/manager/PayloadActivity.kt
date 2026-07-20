@@ -20,7 +20,8 @@ import java.io.File
 class PayloadActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityArchiveBinding
-    private lateinit var payload: File
+    private lateinit var payload: File       // original (may be in a restricted path)
+    private var readablePayload: File? = null
     private var info: PayloadDumper.Info? = null
     private val adapter = PartAdapter()
 
@@ -46,59 +47,88 @@ class PayloadActivity : AppCompatActivity() {
         parse()
     }
 
+    private suspend fun readable(): File? {
+        readablePayload?.let { return it }
+        return withContext(Dispatchers.IO) { Readable.resolve(payload) }.also { readablePayload = it }
+    }
+
+    /** One writable output dir for the whole session (next to the payload if possible, else Download/FilesDev). */
+    private val outputDir: File by lazy {
+        val parent = payload.parentFile
+        val base = if (parent != null && parent.isDirectory && parent.canWrite() && !SafHelper.isRestricted(parent))
+            parent else File(StorageUtil.primaryStorage(), "Download/FilesDev")
+        File(base, "payload_extracted").apply { mkdirs() }
+    }
+
     private fun parse() {
         binding.progress.visibility = View.VISIBLE
         lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                try { Result.success(PayloadDumper.parse(payload)) } catch (e: Exception) { Result.failure(e) }
+            val src = readable()
+            if (src == null) {
+                binding.progress.visibility = View.GONE
+                binding.empty.text = Readable.reason()
+                binding.empty.visibility = View.VISIBLE
+                return@launch
             }
+            val result = withContext(Dispatchers.IO) { runCatching { PayloadDumper.parse(src) } }
             binding.progress.visibility = View.GONE
             result.onSuccess {
                 info = it
                 adapter.submit(it.partitions)
                 binding.summary.text = "${it.partitions.size} partitions · block ${it.blockSize}"
-                binding.empty.visibility = if (it.partitions.isEmpty()) View.VISIBLE else View.GONE
                 binding.empty.text = "No partitions found"
+                binding.empty.visibility = if (it.partitions.isEmpty()) View.VISIBLE else View.GONE
             }.onFailure { e ->
-                binding.empty.text = "Not a valid payload.bin\n${e.message}"
+                binding.empty.text = "Not a valid payload.bin\n${e.message ?: e.javaClass.simpleName}"
                 binding.empty.visibility = View.VISIBLE
             }
         }
     }
 
-    private fun outDir() = File(payload.parentFile ?: filesDir, "payload_extracted").apply { mkdirs() }
-
     private fun extractOne(p: PayloadDumper.Partition) {
         val i = info ?: return
-        if (!p.supported) { Toast.makeText(this, "${p.name}: incremental payload (needs base image)", Toast.LENGTH_LONG).show(); return }
+        val src = readablePayload ?: return
+        if (!p.supported) {
+            Toast.makeText(this, "${p.name}: incremental payload (needs base image)", Toast.LENGTH_LONG).show()
+            return
+        }
         binding.progress.visibility = View.VISIBLE
         lifecycleScope.launch {
-            val ok = withContext(Dispatchers.IO) {
-                try { PayloadDumper.extract(payload, i, p, File(outDir(), "${p.name}.img")) {}; true }
-                catch (e: Exception) { false }
+            val result = withContext(Dispatchers.IO) {
+                runCatching { PayloadDumper.extract(src, i, p, File(outputDir, "${p.name}.img")) {} }
             }
             binding.progress.visibility = View.GONE
-            Toast.makeText(this@PayloadActivity, if (ok) "Extracted ${p.name}.img to payload_extracted" else "Failed: ${p.name}", Toast.LENGTH_LONG).show()
+            result.onSuccess {
+                Toast.makeText(this@PayloadActivity, "Extracted ${p.name}.img to ${outputDir.absolutePath}", Toast.LENGTH_LONG).show()
+                FileScanner.invalidate()
+            }.onFailure { e ->
+                Toast.makeText(this@PayloadActivity, "Failed ${p.name}: ${e.message ?: e.javaClass.simpleName}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
     private fun extractAll() {
         val i = info ?: return
+        val src = readablePayload ?: return
         val supported = i.partitions.filter { it.supported }
-        if (supported.isEmpty()) { Toast.makeText(this, "No full-OTA partitions to extract (incremental payload)", Toast.LENGTH_LONG).show(); return }
+        if (supported.isEmpty()) {
+            Toast.makeText(this, "No full-OTA partitions to extract (incremental payload)", Toast.LENGTH_LONG).show()
+            return
+        }
         binding.progress.visibility = View.VISIBLE
         lifecycleScope.launch {
             val fails = withContext(Dispatchers.IO) {
                 var f = 0
                 for (p in supported) {
-                    try { PayloadDumper.extract(payload, i, p, File(outDir(), "${p.name}.img")) {} } catch (e: Exception) { f++ }
+                    runCatching { PayloadDumper.extract(src, i, p, File(outputDir, "${p.name}.img")) {} }
+                        .onFailure { f++ }
                 }
                 f
             }
             binding.progress.visibility = View.GONE
             FileScanner.invalidate()
             Toast.makeText(this@PayloadActivity,
-                if (fails == 0) "Extracted ${supported.size} partitions to payload_extracted" else "$fails failed",
+                if (fails == 0) "Extracted ${supported.size} partitions to ${outputDir.absolutePath}" else "$fails failed",
                 Toast.LENGTH_LONG).show()
         }
     }
