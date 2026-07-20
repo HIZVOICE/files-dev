@@ -3,6 +3,13 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [5.0] — 2026-07-20 (versionCode 41)
+### Changed
+- **Began the Jetpack Compose + Material 3 + Room modernization** (hybrid, migrating screen by screen). Toolchain added: Jetpack Compose (BOM 2024.06.00, compiler 1.5.14 for Kotlin 1.9.24) and Room 2.6.1 via KSP; Gradle heap raised to accommodate the Compose compiler.
+- **Settings screen rebuilt in Jetpack Compose** — the first migrated screen. Everything else remains on XML Views for now.
+### Added
+- **Room database foundation** (AppDatabase + Favorites table/DAO) to underpin the persistence migration off SharedPreferences.
+
 ## [4.9] — 2026-07-20 (versionCode 40)
 ### Removed
 - **Quick access row** removed from the Storage tab.
