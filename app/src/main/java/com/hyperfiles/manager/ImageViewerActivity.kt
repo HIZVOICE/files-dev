@@ -1,10 +1,14 @@
 package com.hyperfiles.manager
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
 import android.view.GestureDetector
+import android.view.Menu
+import android.view.MenuItem
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.hyperfiles.manager.databinding.ActivityImageViewerBinding
 import java.io.File
@@ -74,6 +78,21 @@ class ImageViewerActivity : AppCompatActivity() {
             }
             true
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val item = menu.add(0, 1, 0, "Share")
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        item.icon = ContextCompat.getDrawable(this, R.drawable.ic_share)?.mutate()?.apply { setTint(Color.WHITE) }
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == 1) {
+            images.getOrNull(index)?.let { OpenHelper.share(this, it) }
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun next() { if (images.size > 1) show((index + 1) % images.size, +1) }

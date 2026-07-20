@@ -3,6 +3,14 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [4.4] — 2026-07-20 (versionCode 35)
+### Fixed
+- **Secure folder opened without asking for a password** from the Storage-tab shortcut — it launched the folder directly, bypassing the lock. It now goes through the lock screen (PIN / pattern / fingerprint), same as the Settings entry.
+### Changed
+- Video player controls **auto-hide faster** (2s instead of ~3.6s), with the existing fade-out.
+### Added
+- **Share** action in the photo viewer toolbar (shares the current image). The video player already exposes Share in its top bar.
+
 ## [4.3] — 2026-07-20 (versionCode 34)
 ### Changed
 - **Recent tab** now has a **Recycle bin** shortcut alongside Cache and Duplicates.

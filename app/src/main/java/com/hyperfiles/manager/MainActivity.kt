@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
         binding.cleanCacheBtn.setOnClickListener { v -> Anim.bounce(v); cleanCache() }
         binding.findDupBtn.setOnClickListener { v -> tap(v) { startActivity(Intent(this, DuplicatesActivity::class.java)) } }
         binding.recycleBinBtn.setOnClickListener { v -> tap(v) { startActivity(Intent(this, RecycleBinActivity::class.java)) } }
-        binding.secureButton.setOnClickListener { v -> tap(v) { startActivity(Intent(this, SecureFolderActivity::class.java)) } }
+        binding.secureButton.setOnClickListener { v -> tap(v) { startActivity(Intent(this, LockActivity::class.java)) } }
 
         binding.bottomNav.setOnItemSelectedListener { item ->
             currentTab = item.itemId

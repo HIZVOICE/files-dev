@@ -349,7 +349,7 @@ class PlayerActivity : AppCompatActivity(), VideoService.Listener {
 
     private fun scheduleHide() {
         ui.removeCallbacks(hideRunnable)
-        if (service?.isPlaying() == true) ui.postDelayed(hideRunnable, 3600)
+        if (service?.isPlaying() == true) ui.postDelayed(hideRunnable, 2000)
     }
 
     private fun setSystemUi(show: Boolean) {
