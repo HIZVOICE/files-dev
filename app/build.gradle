@@ -6,15 +6,15 @@ plugins {
 
 android {
     namespace 'com.hyperfiles.manager'
-    compileSdk 36
-    buildToolsVersion '36.0.0'
+    compileSdk 37
+    buildToolsVersion '37.0.0'
 
     defaultConfig {
         applicationId "com.hyperfiles.manager"
         minSdk 24
-        targetSdk 36
-        versionCode 49
-        versionName "5.8"
+        targetSdk 37
+        versionCode 50
+        versionName "5.9"
     }
 
     splits {

@@ -3,6 +3,12 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [5.9] — 2026-07-20 (versionCode 50)
+### Changed
+- **Android 17 (API 37) support.** The app now compiles against and **targets Android 17** — `compileSdk 37`, `targetSdk 37`, Build-Tools 37.0.0 (minSdk stays 24, so Android 7.0+ is still supported). Installed the `android-37` platform + Build-Tools 37.
+### Build notes
+- API 37 ships under the new minor-versioned SDK scheme (`android-37.0`). The pinned AGP 8.5.2 predates that scheme, so building against API 37 requires either a normalized `platforms/android-37` (integer api-level) locally or an AGP/Gradle upgrade. `android.suppressUnsupportedCompileSdk=37` is set so AGP builds against the newer SDK. No app code changes were needed for the SDK bump.
+
 ## [5.8] — 2026-07-20 (versionCode 49)
 ### Changed
 - **New launcher icon** — a lime-green macOS-style folder with the Android robot embossed in it, on a forest-green backdrop. Implemented as a crisp **adaptive icon** (vector foreground with a lime→olive gradient folder + lighter-green bugdroid, solid forest-green background) so it stays sharp at every size and masks cleanly to circle/squircle/rounded-square. Added a round-icon variant and fixed the icon config (removed the non-v26 adaptive resource that could break the icon on API < 26).
