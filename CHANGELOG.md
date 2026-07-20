@@ -3,6 +3,12 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [4.7] — 2026-07-20 (versionCode 38)
+### Added
+- **Bottom tab bar auto-hides on scroll** — it slides away when scrolling down and reappears when scrolling up (Storage & Recent); the bar now overlays the list so hiding it reveals more content.
+- **Springy overscroll bounce** at the top/bottom of lists (Storage, Recent, Category, Browse) using a physics spring.
+- **Pull-to-refresh on the internal-storage (Storage) list** — swipe down at the top to re-scan and reload folders.
+
 ## [4.6] — 2026-07-20 (versionCode 37)
 ### Changed
 - **Video player UI** rebuilt to the Files-by-Google layout: a **full-width seek bar** with times at the ends (+ a rotate/orientation button), and a **centered bottom transport row** — rewind 10s · previous · play/pause · next · forward 10s. Mute and Share moved into the top bar. The on-screen 10-second skip buttons are back (double-tap L/R still seeks too).

@@ -75,6 +75,7 @@ class BrowseActivity : AppCompatActivity() {
         adapter.sizeOverride = { elevSizes[it.absolutePath] }
         applyLayoutManager()
         binding.list.adapter = adapter
+        Bounce.attach(binding.list)
 
         binding.swipe.setOnRefreshListener { FileScanner.invalidate(); load() }
         binding.pasteBar.setOnClickListener {

@@ -159,7 +159,12 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <!-- STORAGE TAB: categories (collapsing) + internal storage folders -->
+        <!-- STORAGE TAB: pull-to-refresh + categories (collapsing) + internal storage folders -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/homeSwipe"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:id="@+id/homeContainer"
             android:layout_width="match_parent"
@@ -274,10 +279,11 @@
                 android:layout_height="match_parent"
                 android:paddingHorizontal="6dp"
                 android:clipToPadding="false"
-                android:paddingBottom="12dp"
+                android:paddingBottom="88dp"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 android:layoutAnimation="@anim/layout_animation_fall_down" />
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <!-- RECENT TAB -->
         <LinearLayout
@@ -343,6 +349,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingHorizontal="4dp"
+                    android:clipToPadding="false"
+                    android:paddingBottom="88dp"
                     android:layoutAnimation="@anim/layout_animation_fall_down" />
 
                 <ProgressBar
@@ -456,13 +464,14 @@
                     app:cornerRadius="22dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-    </FrameLayout>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/bottom_nav_menu" />
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="?attr/colorSurface"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/bottom_nav_menu" />
+    </FrameLayout>
 </LinearLayout>

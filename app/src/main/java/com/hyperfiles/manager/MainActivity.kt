@@ -93,6 +93,17 @@ class MainActivity : AppCompatActivity() {
         binding.recentsList.layoutManager = LinearLayoutManager(this)
         binding.recentsList.adapter = recentsAdapter
 
+        Bounce.attach(binding.homeFiles)
+        Bounce.attach(binding.recentsList)
+        hideNavOnScroll(binding.homeFiles)
+        hideNavOnScroll(binding.recentsList)
+        binding.homeSwipe.setOnRefreshListener {
+            FileScanner.invalidate()
+            loadHomeFiles()
+            loadCategoriesAndRecents()
+            binding.homeSwipe.isRefreshing = false
+        }
+
         binding.searchButton.setOnClickListener { v ->
             tap(v) {
                 startActivity(Intent(this, BrowseActivity::class.java)
@@ -146,7 +157,7 @@ class MainActivity : AppCompatActivity() {
         binding.headerBar.visibility = if (access) View.VISIBLE else View.GONE
         binding.bottomNav.visibility = if (access) View.VISIBLE else View.GONE
         if (!access) {
-            binding.homeContainer.visibility = View.GONE
+            binding.homeSwipe.visibility = View.GONE
             binding.recentContainer.visibility = View.GONE
             binding.devsContainer.visibility = View.GONE
             // Auto-prompt for storage access on first launch after install
@@ -168,7 +179,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applyTabVisibility() {
-        binding.homeContainer.visibility = if (currentTab == R.id.nav_home) View.VISIBLE else View.GONE
+        binding.homeSwipe.visibility = if (currentTab == R.id.nav_home) View.VISIBLE else View.GONE
         binding.recentContainer.visibility = if (currentTab == R.id.nav_recent) View.VISIBLE else View.GONE
         binding.devsContainer.visibility = if (currentTab == R.id.nav_devs) View.VISIBLE else View.GONE
         binding.bigTitle.text = when (currentTab) {
@@ -180,6 +191,25 @@ class MainActivity : AppCompatActivity() {
         val onStorage = currentTab == R.id.nav_home
         binding.filterButton.visibility = if (onStorage) View.VISIBLE else View.GONE
         binding.secureButton.visibility = if (onStorage) View.VISIBLE else View.GONE
+        setNavHidden(false)
+    }
+
+    // ---- Hide bottom nav while scrolling ----
+    private fun hideNavOnScroll(rv: androidx.recyclerview.widget.RecyclerView) {
+        rv.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+            override fun onScrolled(r: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
+                if (selAdapter != null) return
+                if (dy > 8) setNavHidden(true) else if (dy < -8) setNavHidden(false)
+            }
+        })
+    }
+
+    private fun setNavHidden(hidden: Boolean) {
+        val nav = binding.bottomNav
+        if (nav.visibility != View.VISIBLE) return
+        val target = if (hidden) nav.height.toFloat() else 0f
+        if (nav.translationY == target) return
+        nav.animate().translationY(target).setDuration(200).start()
     }
 
     // ---- Multi-select on Home / Recent lists ----

@@ -68,6 +68,7 @@ class CategoryActivity : AppCompatActivity() {
             else { supportActionBar?.title = "$count selected"; supportActionBar?.subtitle = null }
         }
         applyLayout()
+        Bounce.attach(binding.list)
 
         binding.swipe.setOnRefreshListener { FileScanner.invalidate(); reload() }
         reload()
