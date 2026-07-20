@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark scrim over the blurred album-art backdrop for text/control legibility. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <gradient
+        android:angle="90"
+        android:startColor="#D9000000"
+        android:centerColor="#73000000"
+        android:endColor="#59000000" />
+</shape>

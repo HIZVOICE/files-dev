@@ -3,6 +3,13 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [5.5] — 2026-07-20 (versionCode 46)
+### Changed
+- **Media players redesigned from scratch in a glassmorphism ("Materials") language** — frosted translucent panels, specular white edge strokes, rounded corners and white/vibrancy text, matching the reference mockups.
+  - **Audio player:** the album art now fills the screen as a **blurred vibrant backdrop** (real Gaussian blur on Android 12+ via `RenderEffect`, dark scrim below), with a floating **frosted "now playing" card** holding the art, title/artist, seek bar (accent track) and transport (frosted circular prev/next + accent play).
+  - **Video player:** a floating **frosted top bar** (back · title · mute · share · speed · aspect) and one cohesive **frosted bottom controls card** (full-width seek + rotate, then rewind · previous · accent play · next · forward). Video stays edge-to-edge behind the glass.
+  - **Photo viewer:** the image is the hero on black, with a floating **frosted back button** and a bottom **frosted action bar** showing the filename + size and **Share · Details · Delete**. Tap toggles the chrome; swipe down to dismiss; swipe left/right to change photo. (Delete respects the Recycle bin setting.)
+
 ## [5.4] — 2026-07-20 (versionCode 45)
 ### Fixed
 - **"zip END header not found" on large / HyperOS OTA zips.** ZIP now uses **Apache Commons Compress `ZipFile`** (random-access, full **ZIP64**) instead of `java.util.zip`, which couldn't locate the end-of-central-directory record in multi-GB / stored OTA packages (e.g. `lisa_global-ota_full-…`). These now list and extract correctly.

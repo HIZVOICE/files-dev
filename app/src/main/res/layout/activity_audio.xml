@@ -1,193 +1,231 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="?android:attr/colorBackground">
+    android:background="@color/black">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+    <!-- Blurred album-art backdrop (set + blurred by the Activity) -->
+    <ImageView
+        android:id="@+id/artBackdrop"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@android:color/transparent"
-        app:navigationIcon="@drawable/ic_back"
-        app:navigationIconTint="@color/text_primary"
-        app:title="Now playing"
-        app:titleTextColor="@color/text_primary"
-        app:titleTextAppearance="@style/ToolbarTitle" />
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:contentDescription="Backdrop" />
 
-    <FrameLayout
-        android:id="@+id/artArea"
+    <View
+        android:id="@+id/backdropScrim"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_backdrop_scrim" />
 
-        <View
-            android:id="@+id/artGlow"
-            android:layout_width="330dp"
-            android:layout_height="330dp"
-            android:layout_gravity="center"
-            android:background="@drawable/bg_art_glow" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/artCard"
-            android:layout_width="248dp"
-            android:layout_height="248dp"
-            android:layout_gravity="center"
-            app:cardCornerRadius="28dp"
-            app:cardElevation="14dp"
-            app:cardBackgroundColor="@android:color/transparent">
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            app:navigationIcon="@drawable/ic_back"
+            app:navigationIconTint="@color/white"
+            app:title="Now playing"
+            app:titleTextColor="@color/white"
+            app:titleTextAppearance="@style/ToolbarTitle" />
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_art_placeholder">
+        <!-- Album art -->
+        <FrameLayout
+            android:id="@+id/artArea"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-                <ImageView
-                    android:id="@+id/art"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/artCard"
+                android:layout_width="256dp"
+                android:layout_height="256dp"
+                android:layout_gravity="center"
+                app:cardCornerRadius="26dp"
+                app:cardElevation="18dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#40FFFFFF"
+                app:cardBackgroundColor="@android:color/transparent">
+
+                <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:visibility="gone"
-                    android:contentDescription="Album art" />
+                    android:background="@drawable/bg_art_placeholder">
 
-                <ImageView
-                    android:id="@+id/artGlyph"
-                    android:layout_width="96dp"
-                    android:layout_height="96dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_audio"
-                    app:tint="#66FFFFFF"
-                    android:contentDescription="No album art" />
-            </FrameLayout>
-        </com.google.android.material.card.MaterialCardView>
-    </FrameLayout>
+                    <ImageView
+                        android:id="@+id/art"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone"
+                        android:contentDescription="Album art" />
 
-    <TextView
-        android:id="@+id/trackTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="28dp"
-        android:gravity="center"
-        android:maxLines="2"
-        android:ellipsize="end"
-        android:text="—"
-        android:textColor="@color/text_primary"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/trackSubtitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:gravity="center"
-        android:text=""
-        android:textColor="@color/text_secondary"
-        android:textSize="13sp" />
-
-    <com.google.android.material.slider.Slider
-        android:id="@+id/seekBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:layout_marginTop="16dp"
-        android:valueFrom="0"
-        android:valueTo="1000"
-        android:value="0"
-        android:stepSize="0"
-        app:trackHeight="8dp"
-        app:thumbRadius="7dp"
-        app:labelBehavior="gone" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingHorizontal="26dp"
-        android:layout_marginTop="2dp">
-
-        <TextView
-            android:id="@+id/timeCurrent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0:00"
-            android:textColor="@color/text_secondary"
-            android:textSize="12sp" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
-        <TextView
-            android:id="@+id/timeTotal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0:00"
-            android:textColor="@color/text_secondary"
-            android:textSize="12sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingVertical="22dp"
-        android:layout_marginTop="6dp">
-
-        <ImageView
-            android:id="@+id/btnPlaylist"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:padding="12dp"
-            android:src="@drawable/ic_playlist"
-            app:tint="@color/text_secondary"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Playlist" />
-
-        <ImageView
-            android:id="@+id/btnPrev"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_marginStart="12dp"
-            android:padding="14dp"
-            android:src="@drawable/ic_prev"
-            app:tint="@color/text_primary"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Previous" />
-
-        <FrameLayout
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_marginHorizontal="14dp"
-            android:background="@drawable/bg_play_circle">
-
-            <ImageView
-                android:id="@+id/btnPlayPause"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="18dp"
-                android:src="@drawable/ic_play"
-                app:tint="@color/white"
-                android:contentDescription="Play/Pause" />
+                    <ImageView
+                        android:id="@+id/artGlyph"
+                        android:layout_width="96dp"
+                        android:layout_height="96dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_audio"
+                        app:tint="#66FFFFFF"
+                        android:contentDescription="No album art" />
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
         </FrameLayout>
 
-        <ImageView
-            android:id="@+id/btnNext"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_marginEnd="12dp"
-            android:padding="14dp"
-            android:src="@drawable/ic_next"
-            app:tint="@color/text_primary"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Next" />
+        <!-- Frosted "now playing" card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/bg_glass_panel"
+            android:paddingHorizontal="22dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="14dp">
 
-        <View
-            android:layout_width="48dp"
-            android:layout_height="1dp" />
+            <TextView
+                android:id="@+id/trackTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="—"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/trackSubtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text=""
+                android:textColor="#B3FFFFFF"
+                android:textSize="13sp" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginHorizontal="-6dp"
+                android:valueFrom="0"
+                android:valueTo="1000"
+                android:value="0"
+                android:stepSize="0"
+                app:trackHeight="6dp"
+                app:thumbRadius="7dp"
+                app:labelBehavior="gone"
+                app:thumbColor="@color/white"
+                app:trackColorActive="@color/hyper_blue"
+                app:trackColorInactive="#40FFFFFF"
+                app:haloColor="#33FFFFFF" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="-2dp">
+
+                <TextView
+                    android:id="@+id/timeCurrent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0:00"
+                    android:textColor="#B3FFFFFF"
+                    android:textSize="12sp" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/timeTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0:00"
+                    android:textColor="#B3FFFFFF"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- Transport -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <ImageView
+                    android:id="@+id/btnPlaylist"
+                    android:layout_width="46dp"
+                    android:layout_height="46dp"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_playlist"
+                    app:tint="#B3FFFFFF"
+                    android:background="@drawable/bg_glass_circle"
+                    android:contentDescription="Playlist" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/btnPrev"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:padding="14dp"
+                    android:src="@drawable/ic_prev"
+                    app:tint="@color/white"
+                    android:background="@drawable/bg_glass_circle"
+                    android:contentDescription="Previous" />
+
+                <FrameLayout
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@drawable/bg_play_circle">
+
+                    <ImageView
+                        android:id="@+id/btnPlayPause"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="18dp"
+                        android:src="@drawable/ic_play"
+                        app:tint="@color/white"
+                        android:contentDescription="Play/Pause" />
+                </FrameLayout>
+
+                <ImageView
+                    android:id="@+id/btnNext"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:padding="14dp"
+                    android:src="@drawable/ic_next"
+                    app:tint="@color/white"
+                    android:background="@drawable/bg_glass_circle"
+                    android:contentDescription="Next" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <View
+                    android:layout_width="46dp"
+                    android:layout_height="1dp" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</FrameLayout>

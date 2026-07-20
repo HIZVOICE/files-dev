@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.annotation.SuppressLint
 import android.graphics.Color
+import android.graphics.RenderEffect
+import android.graphics.Shader
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
@@ -171,6 +173,7 @@ class AudioPlayerActivity : AppCompatActivity(), PlaybackService.Listener {
             binding.seekBar.value = 0f
             binding.art.visibility = View.GONE
             binding.artGlyph.visibility = View.VISIBLE
+            binding.artBackdrop.setImageDrawable(null)
             val path = playlist.getOrNull(index)?.absolutePath
             if (path != null) {
                 Thumbs.loadArt(path, video = false) { bmp ->
@@ -178,6 +181,12 @@ class AudioPlayerActivity : AppCompatActivity(), PlaybackService.Listener {
                         binding.art.setImageBitmap(bmp)
                         binding.art.visibility = View.VISIBLE
                         binding.artGlyph.visibility = View.GONE
+                        // Vibrant frosted backdrop derived from the album art.
+                        binding.artBackdrop.setImageBitmap(bmp)
+                        if (Build.VERSION.SDK_INT >= 31) {
+                            binding.artBackdrop.setRenderEffect(
+                                RenderEffect.createBlurEffect(72f, 72f, Shader.TileMode.CLAMP))
+                        }
                     }
                 }
             }
