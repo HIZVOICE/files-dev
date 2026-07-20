@@ -134,8 +134,10 @@ class FileAdapter(
                 val len = sizeOverride?.invoke(f) ?: f.length()
                 it.text = when {
                     dir -> {
-                        val n = f.listFiles()?.size ?: 0
-                        "${StorageUtil.shortStamp(f.lastModified())}  |  $n ${if (n == 1) "item" else "items"}"
+                        val kids = f.listFiles()
+                        // Restricted (Android/data) dirs can't be counted from here — don't show a bogus "0 items".
+                        if (kids == null || (kids.isEmpty() && SafHelper.isRestricted(f))) "Folder"
+                        else "${StorageUtil.shortStamp(f.lastModified())}  |  ${kids.size} ${if (kids.size == 1) "item" else "items"}"
                     }
                     media -> "${StorageUtil.formatSize(len)}  •  ${StorageUtil.mediumDate(f.lastModified())}"
                     else -> "${StorageUtil.shortStamp(f.lastModified())}  |  ${StorageUtil.formatSize(len)}"

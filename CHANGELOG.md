@@ -3,6 +3,13 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [4.8] — 2026-07-20 (versionCode 39)
+### Fixed
+- **Android/data sizes & empty folders.** The elevated `ls -lA` parser is now robust across device formats (toybox ISO date vs. coreutils month name), so files show their **real size**. Restricted folders no longer display a bogus **"0 items"** — they show "Folder" and open normally.
+- **Storage analyzer empty bars.** It now computes real segments — **System & other, Apps (installed APK sizes), Videos, Audio, Photos, Documents** — and draws **filled comparative bars** (each row shows size + % of used).
+### Added
+- **Quick access** shortcut row on the Storage tab — chips for Downloads, Camera, Pictures, Screenshots, Documents, Movies, Music (whichever exist); tap to open.
+
 ## [4.7] — 2026-07-20 (versionCode 38)
 ### Added
 - **Bottom tab bar auto-hides on scroll** — it slides away when scrolling down and reappears when scrolling up (Storage & Recent); the bar now overlays the list so hiding it reveals more content.

@@ -39,8 +39,6 @@ class BrowseActivity : AppCompatActivity() {
     private var showHidden = false
     private val rootDirPaths = HashSet<String>()
     private val elevSizes = HashMap<String, Long>()
-    // Matches a toybox `ls -lA` row: perms(+optional SELinux flag) links owner group size date time name
-    private val lsLine = Regex("""^([bcdlps-][rwxsStT-]{9})\S*\s+\d+\s+\S+\s+\S+\s+(\d+)\s+\S+\s+\S+\s+(.+)$""")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -266,18 +264,22 @@ class BrowseActivity : AppCompatActivity() {
         // restricted entries the app can't stat, so we parse them from the shell instead.
         val r = Elevated.sh("ls -lA \"${dir.absolutePath}\"")
         if (r.ok) {
-            r.stdout.lineSequence().forEach { raw ->
-                val line = raw.trimEnd()
-                if (line.isBlank() || line.startsWith("total ")) return@forEach
-                val m = lsLine.find(line) ?: return@forEach
-                val perms = m.groupValues[1]
-                val size = m.groupValues[2].toLongOrNull() ?: 0L
-                var name = m.groupValues[3]
+            for (raw in r.stdout.lineSequence()) {
+                val line = raw.trim()
+                if (line.isEmpty() || line.startsWith("total ")) continue
+                val toks = line.split(Regex("\\s+"))
+                if (toks.size < 6 || toks[0].length < 10) continue     // not a detail row
+                val type = toks[0][0]
+                // Size column: `perms links owner group size date time name` -> index 4.
+                val size = toks.getOrNull(4)?.toLongOrNull() ?: toks.getOrNull(3)?.toLongOrNull() ?: 0L
+                // Name starts after date+time: toybox uses an ISO date (2 cols), coreutils a month name (3 cols).
+                val nameStart = if (toks.size > 6 && toks[5].matches(Regex("\\d{4}-\\d{2}-\\d{2}"))) 7 else 8
+                if (toks.size <= nameStart) continue
+                var name = toks.subList(nameStart, toks.size).joinToString(" ")
                 if (" -> " in name) name = name.substringBefore(" -> ")   // strip symlink target
-                if (name == "." || name == "..") return@forEach
+                if (name == "." || name == "..") continue
                 val f = File(dir, name)
-                if (perms.startsWith("d")) rootDirPaths.add(f.absolutePath)
-                else elevSizes[f.absolutePath] = size
+                if (type == 'd') rootDirPaths.add(f.absolutePath) else elevSizes[f.absolutePath] = size
                 out.add(f)
             }
         }

@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.chip.Chip
 import com.hyperfiles.manager.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -174,6 +175,7 @@ class MainActivity : AppCompatActivity() {
             binding.bottomNav.selectedItemId = R.id.nav_home
         }
         applyTabVisibility()
+        buildQuickAccess()
         loadHomeFiles()
         loadCategoriesAndRecents()
     }
@@ -237,6 +239,36 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         if (selAdapter != null) exitSelection() else super.onBackPressed()
+    }
+
+    private fun buildQuickAccess() {
+        val primary = StorageUtil.primaryStorage()
+        val shortcuts = listOf(
+            "Downloads" to StorageUtil.downloadsDir(),
+            "Camera" to File(primary, "DCIM"),
+            "Pictures" to File(primary, "Pictures"),
+            "Screenshots" to File(primary, "Pictures/Screenshots"),
+            "Documents" to File(primary, "Documents"),
+            "Movies" to File(primary, "Movies"),
+            "Music" to File(primary, "Music")
+        )
+        val row = binding.quickAccessRow
+        row.removeAllViews()
+        var any = false
+        for ((label, dir) in shortcuts) {
+            if (!dir.exists() || !dir.isDirectory) continue
+            any = true
+            val chip = Chip(this).apply {
+                text = label
+                isCheckable = false
+                isClickable = true
+                setOnClickListener { v -> tap(v) { browse(dir.absolutePath) } }
+            }
+            row.addView(chip)
+        }
+        val vis = if (any) View.VISIBLE else View.GONE
+        binding.quickAccessLabel.visibility = vis
+        binding.quickAccessScroll.visibility = vis
     }
 
     private fun browse(path: String) {
