@@ -13,8 +13,8 @@ android {
         applicationId "com.hyperfiles.manager"
         minSdk 24
         targetSdk 36
-        versionCode 44
-        versionName "5.3"
+        versionCode 45
+        versionName "5.4"
     }
 
     splits {
@@ -76,6 +76,11 @@ dependencies {
     implementation 'org.videolan.android:libvlc-all:3.6.5'
     implementation 'org.apache.commons:commons-compress:1.26.2'
     implementation 'org.tukaani:xz:1.9'
+    // --- Extra archive/compression backends (7-Zip-class coverage) ---
+    implementation 'com.github.junrar:junrar:7.5.5'        // RAR / RAR5 (read)
+    implementation 'org.brotli:dec:0.1.2'                  // Brotli (.br)
+    // NB: Zstandard is intentionally omitted — the only JVM lib (zstd-jni) ships
+    // desktop-only natives with no Android .so, so it can't work on-device.
     implementation 'androidx.biometric:biometric:1.1.0'
     implementation 'androidx.media:media:1.7.0'
     implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'

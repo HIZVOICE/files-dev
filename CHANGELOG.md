@@ -3,6 +3,16 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [5.4] — 2026-07-20 (versionCode 45)
+### Fixed
+- **"zip END header not found" on large / HyperOS OTA zips.** ZIP now uses **Apache Commons Compress `ZipFile`** (random-access, full **ZIP64**) instead of `java.util.zip`, which couldn't locate the end-of-central-directory record in multi-GB / stored OTA packages (e.g. `lisa_global-ota_full-…`). These now list and extract correctly.
+### Added
+- **7-Zip-class format coverage.** The archive engine now opens: **ZIP, 7z, RAR/RAR5, TAR** (+ **.tar.gz/.bz2/.xz/.lzma/.Z/.lz4**), **CPIO, AR, ARJ, DUMP**, and standalone compressors **gzip, bzip2, xz, lzma, .Z (compress), LZ4, Snappy, Brotli**. Detection auto-falls-back to header sniffing, so extensionless/misnamed archives still open.
+  - New backends: **junrar** (RAR read) and **org.brotli:dec** (Brotli).
+### Notes
+- **Zstandard (.zst) is not included:** the only JVM library (`zstd-jni`) ships desktop-only natives with no Android `.so`, so it can't work on-device. Left out rather than shipping a feature that fails at runtime.
+- Encrypted / password-protected archives remain unsupported; unreadable entries are skipped rather than aborting the whole extraction.
+
 ## [5.3] — 2026-07-20 (versionCode 44)
 ### Fixed
 - **ZIP / archive handling that "didn't work" for restricted locations.** Archive listing, extraction and the ROM-payload (`payload.bin`) parser used plain `java.io`, so anything in **Android/data**, **Android/obb** or a **root-only path** (`/data`, `/system`, …) failed silently — exactly the places this app exists to reach. All of them now resolve the file through the **elevated (Shizuku/root) backend** first (copy-out to a shared temp dir when it isn't directly readable).

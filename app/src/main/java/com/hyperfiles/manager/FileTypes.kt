@@ -23,7 +23,8 @@ object FileTypes {
     val DOC = setOf("pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "rtf", "odt", "ods", "odp",
         "csv", "md", "epub")
     val ARCHIVE = setOf("zip", "7z", "rar", "tar", "gz", "bz2", "xz", "tgz", "tbz2", "tbz", "txz",
-        "tar.gz", "tar.bz2", "tar.xz", "lzma", "cpio", "jar")
+        "tar.gz", "tar.bz2", "tar.xz", "lzma", "cpio", "jar", "br", "lz4", "sz",
+        "z", "taz", "arj")
     val APK = setOf("apk", "apks", "xapk", "apkm", "aab")
     val TEXT = setOf("txt", "md", "log", "json", "xml", "html", "htm", "csv", "yml", "yaml", "ini", "conf",
         "cfg", "properties", "gradle", "java", "kt", "c", "cpp", "h", "py", "js", "ts", "css", "sh", "rtf")
