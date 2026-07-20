@@ -3,6 +3,14 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [5.1] — 2026-07-20 (versionCode 42)
+### Changed
+- **Recycle bin, System info, and APK info rebuilt in Jetpack Compose + Material 3** — continuing the screen-by-screen migration begun with Settings in 5.0. Recycle bin is now a Compose `LazyColumn` with a per-item dropdown (Restore · Open · Delete forever) and an Empty-bin confirm dialog; System info and APK info are Compose scaffolds (monospaced detail, copy / install actions, APK icon rendered via Compose `Image`).
+- **`FilesDevTheme` now honors the app's theme mode** (System / Light / Dark / AMOLED) and matches the existing palette (accent `#3482FF`), so the Compose screens look identical to the rest of the app instead of defaulting to the Material baseline.
+- **Recycle-bin index moved off SharedPreferences into Room** (new `trash` table + `TrashDao`). `TrashBin`'s public API is unchanged, so callers were untouched; the DB uses destructive migration for the index only — trashed files on disk are unaffected.
+### Removed
+- Old XML `TrashAdapter` / RecyclerView for the recycle bin (superseded by the Compose list).
+
 ## [5.0] — 2026-07-20 (versionCode 41)
 ### Changed
 - **Began the Jetpack Compose + Material 3 + Room modernization** (hybrid, migrating screen by screen). Toolchain added: Jetpack Compose (BOM 2024.06.00, compiler 1.5.14 for Kotlin 1.9.24) and Room 2.6.1 via KSP; Gradle heap raised to accommodate the Compose compiler.

@@ -6,40 +6,76 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.hyperfiles.manager.databinding.ActivitySysinfoBinding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.hyperfiles.manager.ui.FilesDevTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class SysInfoActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivitySysinfoBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Theming.applyActivityTheme(this)
-        binding = ActivitySysinfoBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
-        binding.toolbar.setNavigationOnClickListener { finish() }
-        title = "System info"
-
-        binding.btnCopy.setOnClickListener {
-            val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            cm.setPrimaryClip(ClipData.newPlainText("sysinfo", binding.sysContent.text))
-            Toast.makeText(this, "Copied", Toast.LENGTH_SHORT).show()
-        }
-
-        load()
+        setContent { FilesDevTheme { SysInfoScreen() } }
     }
 
-    private fun load() {
-        binding.sysContent.text = "Reading…"
-        lifecycleScope.launch {
-            val text = withContext(Dispatchers.IO) { build() }
-            binding.sysContent.text = text
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun SysInfoScreen() {
+        val text by produceState(initialValue = "Reading…") {
+            value = withContext(Dispatchers.IO) { build() }
+        }
+        Scaffold(
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            topBar = {
+                TopAppBar(
+                    windowInsets = WindowInsets(0, 0, 0, 0),
+                    title = { Text("System info") },
+                    navigationIcon = {
+                        IconButton(onClick = { finish() }) {
+                            Icon(painterResource(R.drawable.ic_back), contentDescription = "Back")
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = {
+                            val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            cm.setPrimaryClip(ClipData.newPlainText("sysinfo", text))
+                            Toast.makeText(this@SysInfoActivity, "Copied", Toast.LENGTH_SHORT).show()
+                        }) { Icon(painterResource(R.drawable.ic_copy), contentDescription = "Copy") }
+                    }
+                )
+            }
+        ) { pad ->
+            Text(
+                text = text,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .padding(pad)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp)
+            )
         }
     }
 

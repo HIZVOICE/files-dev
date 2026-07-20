@@ -39,9 +39,33 @@ interface FavoriteDao {
     suspend fun remove(path: String)
 }
 
-@Database(entities = [Favorite::class], version = 1, exportSchema = false)
+/** Recycle-bin index (moved off SharedPreferences). Keyed by the file's name inside the trash dir. */
+@Entity(tableName = "trash")
+data class TrashEntry(
+    @PrimaryKey val trashName: String,
+    val originalPath: String,
+    val deletedAt: Long
+)
+
+@Dao
+interface TrashDao {
+    @Query("SELECT * FROM trash")
+    fun all(): List<TrashEntry>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(entry: TrashEntry)
+
+    @Query("DELETE FROM trash WHERE trashName = :name")
+    fun delete(name: String)
+
+    @Query("DELETE FROM trash")
+    fun clear()
+}
+
+@Database(entities = [Favorite::class, TrashEntry::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun favoriteDao(): FavoriteDao
+    abstract fun trashDao(): TrashDao
 }
 
 object Db {
@@ -51,6 +75,8 @@ object Db {
         instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(
                 context.applicationContext, AppDatabase::class.java, "filesdev.db"
-            ).fallbackToDestructiveMigration().build().also { instance = it }
+            ).fallbackToDestructiveMigration()
+                .allowMainThreadQueries()   // tables are tiny (trash index, favorites)
+                .build().also { instance = it }
         }
 }
