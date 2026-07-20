@@ -3,6 +3,10 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [5.7] — 2026-07-20 (versionCode 48)
+### Added
+- **Cancel a running extraction.** The progress pill now has a **Cancel (✕)** button, and the ongoing notification has a matching **Cancel** action. Cancelling aborts the extraction promptly (checked per entry and mid-file, so even a huge single file stops quickly) and **deletes the partial output folder** so no half-extracted mess is left behind. The pill briefly shows "Extraction canceled" and clears.
+
 ## [5.6] — 2026-07-20 (versionCode 47)
 ### Added
 - **Background extraction with an overall progress pill.** Archive extraction ("Extract all" and context-menu "Extract here") now runs in the **background** — it keeps going if you leave the archive screen — and shows a floating **glass pill with the overall percentage** (plus an ongoing status-bar notification). ZIP / 7z / RAR report an accurate byte-based percent; streamed formats (tar, cpio, …) show an indeterminate bar. The pill follows you across the Home, browser and archive screens and clears itself when done (✓) or on failure (with the reason).

@@ -136,13 +136,18 @@ object ArchiveEngine {
      * Extract everything to [destDir]. [onProgress] reports overall percent 0..100,
      * or -1 for an indeterminate phase (formats whose total size isn't known upfront).
      */
-    fun extractAll(file: File, destDir: File, onProgress: (Int) -> Unit = {}) {
+    fun extractAll(
+        file: File,
+        destDir: File,
+        onProgress: (Int) -> Unit = {},
+        isCancelled: () -> Boolean = { false }
+    ) {
         destDir.mkdirs()
         when {
-            isSevenZ(file) -> sevenZExtract(file, destDir, onProgress)
-            isRar(file) -> rarExtract(file, destDir, onProgress)
-            isZipContainer(file) -> zipExtract(file, destDir, onProgress)
-            else -> streamExtract(file, destDir, onProgress)
+            isSevenZ(file) -> sevenZExtract(file, destDir, onProgress, isCancelled)
+            isRar(file) -> rarExtract(file, destDir, onProgress, isCancelled)
+            isZipContainer(file) -> zipExtract(file, destDir, onProgress, isCancelled)
+            else -> streamExtract(file, destDir, onProgress, isCancelled)
         }
         onProgress(100)
     }
@@ -160,9 +165,15 @@ object ArchiveEngine {
     }
 
     /** OutputStream that reports bytes to a Sink (for libraries that write internally, e.g. junrar). */
-    private class CountingOut(private val out: OutputStream, private val sink: Sink) : OutputStream() {
-        override fun write(b: Int) { out.write(b); sink.add(1) }
-        override fun write(b: ByteArray, off: Int, len: Int) { out.write(b, off, len); sink.add(len) }
+    private class CountingOut(
+        private val out: OutputStream,
+        private val sink: Sink,
+        private val isCancelled: () -> Boolean
+    ) : OutputStream() {
+        override fun write(b: Int) { if (isCancelled()) throw ExtractCancelled(); out.write(b); sink.add(1) }
+        override fun write(b: ByteArray, off: Int, len: Int) {
+            if (isCancelled()) throw ExtractCancelled(); out.write(b, off, len); sink.add(len)
+        }
         override fun flush() = out.flush()
         override fun close() = out.close()
     }
@@ -213,7 +224,7 @@ object ArchiveEngine {
     }
 
     @Suppress("DEPRECATION")
-    private fun zipExtract(file: File, destDir: File, onProgress: (Int) -> Unit) {
+    private fun zipExtract(file: File, destDir: File, onProgress: (Int) -> Unit, isCancelled: () -> Boolean) {
         ApacheZipFile(file).use { zf ->
             var total = 0L
             run {
@@ -225,6 +236,7 @@ object ArchiveEngine {
             val buf = ByteArray(1 shl 16)
             val en = zf.entries
             while (en.hasMoreElements()) {
+                if (isCancelled()) throw ExtractCancelled()
                 val z = en.nextElement()
                 val outFile = safeChild(destDir, z.name)
                 if (z.isDirectory) outFile.mkdirs()
@@ -232,7 +244,10 @@ object ArchiveEngine {
                     outFile.parentFile?.mkdirs()
                     zf.getInputStream(z).use { ins ->
                         FileOutputStream(outFile).use { fos ->
-                            while (true) { val r = ins.read(buf); if (r < 0) break; fos.write(buf, 0, r); sink.add(r) }
+                            while (true) {
+                                if (isCancelled()) throw ExtractCancelled()
+                                val r = ins.read(buf); if (r < 0) break; fos.write(buf, 0, r); sink.add(r)
+                            }
                         }
                     }
                 }
@@ -269,7 +284,7 @@ object ArchiveEngine {
     }
 
     @Suppress("DEPRECATION")
-    private fun sevenZExtract(file: File, destDir: File, onProgress: (Int) -> Unit) {
+    private fun sevenZExtract(file: File, destDir: File, onProgress: (Int) -> Unit, isCancelled: () -> Boolean) {
         val total = runCatching { sevenZTotal(file) }.getOrDefault(0L)
         if (total <= 0) onProgress(-1)
         val sink = Sink(total, onProgress)
@@ -277,12 +292,16 @@ object ArchiveEngine {
             var e = sz.nextEntry
             val buf = ByteArray(1 shl 16)
             while (e != null) {
+                if (isCancelled()) throw ExtractCancelled()
                 val outFile = safeChild(destDir, e.name)
                 if (e.isDirectory) outFile.mkdirs()
                 else {
                     outFile.parentFile?.mkdirs()
                     FileOutputStream(outFile).use { fos ->
-                        while (true) { val r = sz.read(buf); if (r < 0) break; fos.write(buf, 0, r); sink.add(r) }
+                        while (true) {
+                            if (isCancelled()) throw ExtractCancelled()
+                            val r = sz.read(buf); if (r < 0) break; fos.write(buf, 0, r); sink.add(r)
+                        }
                     }
                 }
                 e = sz.nextEntry
@@ -318,16 +337,17 @@ object ArchiveEngine {
         return out
     }
 
-    private fun rarExtract(file: File, destDir: File, onProgress: (Int) -> Unit) {
+    private fun rarExtract(file: File, destDir: File, onProgress: (Int) -> Unit, isCancelled: () -> Boolean) {
         RarArchive(file).use { a ->
             var total = 0L
             for (h in a.fileHeaders) if (!h.isDirectory) total += h.fullUnpackSize
             if (total <= 0) onProgress(-1)
             val sink = Sink(total, onProgress)
             for (h in a.fileHeaders) {
+                if (isCancelled()) throw ExtractCancelled()
                 val outFile = safeChild(destDir, rarName(h))
                 if (h.isDirectory) outFile.mkdirs()
-                else { outFile.parentFile?.mkdirs(); FileOutputStream(outFile).use { a.extractFile(h, CountingOut(it, sink)) } }
+                else { outFile.parentFile?.mkdirs(); FileOutputStream(outFile).use { a.extractFile(h, CountingOut(it, sink, isCancelled)) } }
             }
         }
     }
@@ -388,7 +408,7 @@ object ArchiveEngine {
         return if (c != null) { runCatching { c.close() }; listOf(Entry(strippedName(file), -1, false)) } else emptyList()
     }
 
-    private fun streamExtract(file: File, destDir: File, onProgress: (Int) -> Unit) {
+    private fun streamExtract(file: File, destDir: File, onProgress: (Int) -> Unit, isCancelled: () -> Boolean) {
         onProgress(-1)   // total isn't known upfront for streamed archives → indeterminate
         val ais = openArchive(file)
         if (ais != null) {
@@ -396,13 +416,17 @@ object ArchiveEngine {
                 var e = it.nextEntry
                 val buf = ByteArray(1 shl 16)
                 while (e != null) {
+                    if (isCancelled()) throw ExtractCancelled()
                     if (it.canReadEntryData(e)) {
                         val outFile = safeChild(destDir, e.name)
                         if (e.isDirectory) outFile.mkdirs()
                         else {
                             outFile.parentFile?.mkdirs()
                             FileOutputStream(outFile).use { fos ->
-                                while (true) { val r = it.read(buf); if (r < 0) break; fos.write(buf, 0, r) }
+                                while (true) {
+                                    if (isCancelled()) throw ExtractCancelled()
+                                    val r = it.read(buf); if (r < 0) break; fos.write(buf, 0, r)
+                                }
                             }
                         }
                     }
