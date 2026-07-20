@@ -3,6 +3,10 @@
 Package `com.hyperfiles.manager` · minSdk 24 · compile/target SDK 36 · Kotlin + XML Views + Material 3.
 All releases are debug-signed, ABI-split APKs (arm64-v8a, armeabi-v7a).
 
+## [5.8] — 2026-07-20 (versionCode 49)
+### Changed
+- **New launcher icon** — a lime-green macOS-style folder with the Android robot embossed in it, on a forest-green backdrop. Implemented as a crisp **adaptive icon** (vector foreground with a lime→olive gradient folder + lighter-green bugdroid, solid forest-green background) so it stays sharp at every size and masks cleanly to circle/squircle/rounded-square. Added a round-icon variant and fixed the icon config (removed the non-v26 adaptive resource that could break the icon on API < 26).
+
 ## [5.7] — 2026-07-20 (versionCode 48)
 ### Added
 - **Cancel a running extraction.** The progress pill now has a **Cancel (✕)** button, and the ongoing notification has a matching **Cancel** action. Cancelling aborts the extraction promptly (checked per entry and mid-file, so even a huge single file stops quickly) and **deletes the partial output folder** so no half-extracted mess is left behind. The pill briefly shows "Extraction canceled" and clears.
